@@ -1,0 +1,15 @@
+[Unit]
+Description=nsqlookupd
+After=docker.service
+Requires=docker.service
+
+[Service]
+EnvironmentFile=/etc/environment
+ExecStartPre=-/usr/bin/docker kill %p-%i
+ExecStartPre=-/usr/bin/docker rm %p-%i
+ExecStartPre=/usr/bin/docker pull nsqio/nsq
+ExecStart=/usr/bin/docker run --name %p-%i -p 4160:4160 -p 4161:4161 nsqio/nsq /nsqlookupd
+ExecStop=/usr/bin/docker stop %p-%i
+
+[X-Fleet]
+Conflicts=nsqlookupd@*.service

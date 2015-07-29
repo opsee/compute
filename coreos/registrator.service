@@ -1,0 +1,15 @@
+[Unit]
+Description=Registrator
+After=etcd2.service docker.service
+Requires=etcd2.service docker.service
+
+[Service]
+EnvironmentFile=/etc/environment
+ExecStartPre=-/usr/bin/docker kill registrator
+ExecStartPre=-/usr/bin/docker rm registrator
+ExecStartPre=/usr/bin/docker pull gliderlabs/registrator
+ExecStart=/usr/bin/docker run --volume /var/run/docker.sock:/var/run/docker.sock --hostname %H --add-host host:${COREOS_PRIVATE_IPV4} --name registrator gliderlabs/registrator -ip ${COREOS_PRIVATE_IPV4} etcd://host:2379/opsee.co/registrator
+ExecStop=/usr/bin/docker stop registrator
+
+[X-Fleet]
+Global=true

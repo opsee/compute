@@ -1,0 +1,45 @@
+#cloud-config
+coreos:
+  etcd2:
+    listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
+    advertise-client-urls: http://$private_ipv4:2379,http://$private_ipv4:4001
+    initial-advertise-peer-urls: http://$private_ipv4:2380,http://$private_ipv4:7001
+    listen-peer-urls: http://$private_ipv4:2380,http://$private_ipv4:7001
+    discovery: https://discovery.etcd.io/4dc484e82749cdb6a26f92e594b56029
+  fleet:
+    metadata: "role=node"
+  units:
+    - name: etcd.service
+      command: stop
+    - name: etcd2.service
+      command: start
+    - name: fleet.service
+      command: start
+      drop-ins:
+        - name: 30-listen-stream.conf
+          content: |
+            [Socket]
+            ListenStream="127.0.0.1:49153"
+    - name: docker.service
+      command: start
+      user: core
+  update:
+    group: beta
+    reboot-strategy: etcd-lock
+write_files:
+  - path: /opt/etc/environment
+    permissions: 0644
+    owner: root
+    content: |
+      ETCD_HOST=$private_ipv4
+      ETCD_PORT=2379
+  - path: /home/core/.dockercfg
+    permissions: 0600
+    owner: core
+    content: |
+      {
+          "quay.io": {
+                  "auth": "b3BzZWUrb3BzZWVjaTpGNFE2RlJWMVpaT1FWV0hHVDNIU0gzSVlKOEFJOUYxUk5RWVVLTFFKUVpKVUU3MTFWSjZSSUJBVlg4VkJLV1lI",
+                  "email": "ci@opsee.co"
+          }
+      }

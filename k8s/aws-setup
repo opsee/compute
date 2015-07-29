@@ -1,0 +1,29 @@
+Setup security group for kubernetes
+
+awcreate-security-group --group-name kubernetes --description "Kubernetes Security Group"
+aws ec2 authorize-security-group-ingress --group-name kubernetes --protocol tcp --port 22 --cidr 0.0.0.0/0
+aws ec2 authorize-security-group-ingress --group-name kubernetes --protocol tcp --port 80 --cidr 0.0.0.0/0
+aws ec2 authorize-security-group-ingress --group-name kubernetes --source-security-group-name kubernetes
+
+curl -O https://raw.githubusercontent.com/GoogleCloudPlatform/kubernetes/master/docs/getting-started-guides/coreos/cloud-configs/master.yaml
+curl -O https://raw.githubusercontent.com/GoogleCloudPlatform/kubernetes/master/docs/getting-started-guides/coreos/cloud-configs/node.yaml
+
+aws ec2 run-instances --image-id ami-37280207 --key-name greg --region us-west-2 --security-groups kubernetes --instance-type m3.medium --user-data file://master.yaml
+aws ec2 run-instances --count 2 --image-id ami-37280207 --key-name greg --region us-west-2 --security-groups kubernetes --instance-type m3.medium --user-data file://node.yaml
+
+master.yml provides:
+- network environment setup (https://github.com/kelseyhightower/setup-network-environment)
+- fleet
+- flanneld
+- docker-cache
+- docker
+- kube-apiserver
+- kube-controller-manager
+- kube-scheduler
+- kube-register
+
+aws ec2 describe-instances --instance-id <master-instance-id>
+
+sed -i 's/<master-private-ip>/172.31.2.68/g' node.yml
+
+aws ec2
