@@ -10,8 +10,6 @@ fi
 
 shift 1
 
-pubkey=$(curl https://github.com/${name}.keys)
-
 for machine in $($fleetctl $@ list-machines --no-legend --full | awk '{ print $1;}'); do
-	$fleetctl $@ ssh $machine "echo '${pubkey}' | update-ssh-keys -a $name -n"
+	$fleetctl $@ ssh $machine "update-ssh-keys -d $name"
 done
