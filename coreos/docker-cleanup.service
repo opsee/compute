@@ -1,0 +1,12 @@
+[Unit]
+Description=Docker Cleanup Service
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=docker ps -aqf status=exited | docker rm
+ExecStart=docker images -q | docker rmi
+
+[X-Fleet]
+Global=true

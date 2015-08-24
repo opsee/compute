@@ -1,0 +1,12 @@
+[Unit]
+Description=Docker Cleanup Timer
+Requires=docker.service
+After=docker.service
+
+[Timer]
+OnBootSec=2m
+OnUnitInactiveSec=1h
+Unit=docker-cleanup.service
+
+[X-Fleet]
+Global=true
