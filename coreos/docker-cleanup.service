@@ -5,8 +5,8 @@ After=docker.service
 
 [Service]
 Type=oneshot
-ExecStart=docker ps -aqf status=exited | docker rm
-ExecStart=docker images -q | docker rmi
+ExecStart=/bin/bash -c "cs=`/usr/bin/docker ps -aqf status=exited`; if [ ! -z "$cs" ]; then echo $cs | /usr/bin/xargs docker rm else exit 0 fi"
+ExecStart=/bin/bash -c "is=`/usr/bin/docker images -q`; if [ ! -z "$is" ]; then echo $is | /usr/bin/xargs docker rmi else exit 0 fi"
 
 [X-Fleet]
 Global=true
