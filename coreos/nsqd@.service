@@ -2,6 +2,7 @@
 Description=nsqd
 After=docker.service
 Requires=docker.service
+Wants=nsqd-elb@%i.service
 
 [Service]
 EnvironmentFile=/etc/environment
