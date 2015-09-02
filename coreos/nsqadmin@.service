@@ -2,13 +2,14 @@
 Description=nsqadmin
 After=docker.service
 Requires=docker.service
+PartOf=nsqd@%i.service
 
 [Service]
 EnvironmentFile=/etc/environment
 ExecStartPre=-/usr/bin/docker kill %p-%i
 ExecStartPre=-/usr/bin/docker rm %p-%i
 ExecStartPre=/usr/bin/docker pull nsqio/nsq
-ExecStart=/usr/bin/docker run --name %p-%i -p 4171:4171 nsqio/nsq /nsqadmin -lookupd-http-address=172.31.8.48:4161 -lookupd-http-address=172.31.8.49:4161 -lookupd-http-address=172.31.8.50:4161
+ExecStart=/usr/bin/docker run --name %p-%i -p 4171:4171 nsqio/nsq /nsqadmin -lookupd-http-address=${COREOS_PRIVATE_IPV4}:4161
 ExecStop=/usr/bin/docker stop %p-%i
 
 [X-Fleet]
