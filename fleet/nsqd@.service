@@ -1,7 +1,8 @@
 [Unit]
 Description=nsqd
 After=docker.service
-Requires=docker.service nsqd-elb@%i.service
+Requires=docker.service
+Wants=nsqd-elb@%i.service
 
 [Service]
 Restart=always

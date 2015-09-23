@@ -24,6 +24,30 @@ coreos:
     - name: docker.service
       command: start
       user: core
+    - name: format-ephemeral.service
+      command: start
+      content: |
+        [Unit]
+        Description=Format attached ephemeral storage.
+        After=dev-xvdb.device
+        Requires=dev-xvdb.device
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/sbin/wipefs -f /dev/xvdb
+        ExecStart=/usr/sbin/mkfs.ext4 /dev/xvdb
+    - name: var-lib-docker.mount
+      command: start
+      content: |
+        [Unit]
+        Description=Mount ephemeral storage to /var/lib/docker
+        Requires=format-ephemeral.service
+        After=format-ephemeral.service
+        Before=docker.service
+        [Mount]
+        What=/dev/xvdb
+        Where=/var/lib/docker
+        Type=ext4
   update:
     group: beta
     reboot-strategy: etcd-lock

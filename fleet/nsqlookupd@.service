@@ -2,6 +2,7 @@
 Description=nsqlookupd
 After=docker.service
 Requires=docker.service %p-elb@%i.service
+Wants=%p-elb@%i.service
 
 [Service]
 User=core

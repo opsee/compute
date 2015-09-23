@@ -1,6 +1,7 @@
 [Unit]
 Description=NSQd ELB Registration
 After=docker.service
+Requires=docker.service
 PartOf=nsqd@%i.service
 
 [Service]

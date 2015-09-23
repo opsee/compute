@@ -1,6 +1,7 @@
 [Unit]
 Description=nsqlookupd ELB Registration
-After=docker.service nsqlookupd@%i.service
+After=docker.service
+Requires=docker.service
 PartOf=nsqlookupd@%i.service
 
 [Service]
