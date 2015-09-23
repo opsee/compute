@@ -4,6 +4,8 @@ After=docker.service
 Requires=docker.service
 
 [Service]
+User=core
+Restart=always
 EnvironmentFile=/etc/environment
 ExecStartPre=-/usr/bin/docker stop -t 2 %p
 ExecStartPre=-/usr/bin/docker rm %p

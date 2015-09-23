@@ -1,0 +1,15 @@
+[Unit]
+Description=nsqadmin
+After=docker.service
+Requires=docker.service
+
+[Service]
+EnvironmentFile=/etc/environment
+ExecStartPre=-/usr/bin/docker stop -t 5 %p-%i
+ExecStartPre=-/usr/bin/docker rm %p-%i
+ExecStartPre=/usr/bin/docker pull nsqio/nsq
+ExecStart=/usr/bin/docker run --name %p-%i -p 4171:4171 nsqio/nsq /nsqadmin -lookupd-http-address=nsqlookupd-1.opsy.co:4161 -lookupd-http-address=nsqlookupd-2.opsy.co:4161
+ExecStop=/usr/bin/docker stop -t 5 %p-%i
+
+[X-Fleet]
+Conflicts=nsqadmin@*.service

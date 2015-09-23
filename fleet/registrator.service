@@ -4,6 +4,8 @@ After=etcd2.service docker.service
 Requires=etcd2.service docker.service
 
 [Service]
+User=core
+Restart=always
 EnvironmentFile=/etc/environment
 ExecStartPre=-/usr/bin/docker kill registrator
 ExecStartPre=-/usr/bin/docker rm registrator

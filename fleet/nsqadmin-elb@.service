@@ -1,0 +1,17 @@
+[Unit]
+Description=nsqadmin ELB
+After=docker.service nsqadmin@%i.service
+PartOf=nsqadmin@%i.service
+
+[Service]
+User=core
+Restart=always
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker stop -t 5 %p-%i
+ExecStartPre=-/usr/bin/docker rm %p-%i
+ExecStartPre=/usr/bin/docker pull quay.io/coreos/elb-presence:latest
+ExecStart=/usr/bin/docker run --rm --name %p-%i -e AWS_ACCESS_KEY=AKIAIWSLK3OVJGCYOQTQ -e AWS_SECRET_KEY=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 -e AWS_REGION=us-west-1 -e ELB_NAME=nsqadmin-lb quay.io/coreos/elb-presence
+ExecStop=/usr/bin/docker stop -t 5 %p-%i
+
+[X-Fleet]
+MachineOf=nsqadmin@%i.service

@@ -1,0 +1,17 @@
+[Unit]
+Description=nsqlookupd ELB Registration
+After=docker.service nsqlookupd@%i.service
+PartOf=nsqlookupd@%i.service
+
+[Service]
+User=core
+Restart=always
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker stop -t 5 %p-%i
+ExecStartPre=-/usr/bin/docker rm %p-%i
+ExecStartPre=/usr/bin/docker pull quay.io/coreos/elb-presence:latest
+ExecStart=/usr/bin/docker run --rm --name %p-%i -e AWS_REGION=us-west-1 -e ELB_NAME=nsqlookupd-%i-lb quay.io/coreos/elb-presence
+ExecStop=/usr/bin/docker stop -t 5 %p-%i
+
+[X-Fleet]
+MachineOf=nsqlookupd@%i.service

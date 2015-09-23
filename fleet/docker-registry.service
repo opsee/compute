@@ -1,0 +1,17 @@
+[Unit]
+Description=Docker Registry
+After=docker.service
+Requires=docker.service
+
+[Service]
+Restart=always
+User=core
+EnvironmentFile=/etc/environment
+ExecStartPre=-/usr/bin/docker stop -t 5 %p
+ExecStartPre=-/usr/bin/docker rm %p
+ExecStartPre=/usr/bin/docker pull registry:2
+ExecStart=/usr/bin/docker run --name %p -p 5000:5000 -e SETTINGS_FLAVOR=s3 -e AWS_BUCKET=opsee-registry -e STORAGE_PATH=/registry -e AWS_KEY=AKIAID5SP7SBJVT55UHQ -e AWS_SECRET=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 -e SEARCH_BACKEND=sqlalchemy registry:2
+ExecStop=/usr/bin/docker stop -t 5 registrator
+
+[X-Fleet]
+Global=true
