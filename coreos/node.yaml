@@ -49,7 +49,7 @@ coreos:
         Where=/var/lib/docker
         Type=ext4
   update:
-    group: beta
+    group: alpha
     reboot-strategy: etcd-lock
 write_files:
   - path: /opt/etc/environment
