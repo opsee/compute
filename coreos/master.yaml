@@ -67,5 +67,5 @@ coreos:
         [Install]
         WantedBy=multi-user.target
   update:
-    group: beta
+    group: alpha
     reboot-strategy: etcd-lock

@@ -24,7 +24,7 @@ coreos:
       command: start
       user: core
   update:
-    group: beta
+    group: alpha
     reboot-strategy: etcd-lock
 write_files:
   - path: /opt/etc/environment
