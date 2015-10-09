@@ -1,0 +1,18 @@
+{
+  "family": "nsqadmin",
+  "containerDefinitions": [
+    {
+      "name": "nsqadmin",
+      "image": "nsqio/nsq",
+      "memory": 32,
+      "portMappings": [
+        {
+          "hostPort": 4171,
+          "containerPort": 4171,
+          "protocol": "tcp"
+        }
+      ],
+      "command": ["/nsqadmin", "-lookupd-http-address=nsqlookupd-1.opsy.co:4161", "-lookupd-http-address=nsqlookupd-2.opsy.co:4161"]
+    }
+  ]
+}

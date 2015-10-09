@@ -1,0 +1,20 @@
+[Unit]
+Description=Amazon ECS Agent
+After=docker.service
+Requires=docker.service
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Environment=ECS_CLUSTER=staging
+Environment=ECS_LOGLEVEL=warn
+Environment=ECS_ENGINE_AUTH_TYPE=dockercfg
+Environment=ECS_ENGINE_AUTH_DATA={"quay.io": { "auth": "b3BzZWUrb3BzZWVjaTpGNFE2RlJWMVpaT1FWV0hHVDNIU0gzSVlKOEFJOUYxUk5RWVVLTFFKUVpKVUU3MTFWSjZSSUJBVlg4VkJLV1lI", "email": "ci@opsee.com" } }
+ExecStartPre=-/usr/bin/docker kill ecs-agent
+ExecStartPre=-/usr/bin/docker rm ecs-agent
+ExecStartPre=/usr/bin/docker pull amazon/amazon-ecs-agent
+ExecStart=/usr/bin/docker run --name ecs-agent -e ECS_CLUSTER -e ECS_LOGLEVEL -e ECS_ENGINE_AUTH_TYPE -e ECS_ENGINE_AUTH_DATA --publish=127.0.0.1:51678:51678 --volume=/var/run/docker.sock:/var/run/docker.sock amazon/amazon-ecs-agent
+ExecStop=/usr/bin/docker stop ecs-agent
+
+[X-Fleet]
+Global=true

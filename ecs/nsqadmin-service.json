@@ -1,0 +1,15 @@
+{
+    "cluster": "staging", 
+    "serviceName": "nsqadmin", 
+    "taskDefinition": "nsqadmin", 
+    "loadBalancers": [
+        {
+            "loadBalancerName": "nsqadmin-lb", 
+            "containerName": "nsqadmin", 
+            "containerPort": 4171
+        }
+    ], 
+    "desiredCount": 2, 
+    "clientToken": "nsqadmin-service", 
+    "role": "ecsServiceRole"
+}
