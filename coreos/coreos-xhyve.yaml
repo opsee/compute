@@ -1,12 +1,5 @@
 #cloud-config
 coreos:
-  etcd2:
-    listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
-    advertise-client-urls: http://$private_ipv4:2379,http://$private_ipv4:4001
-    initial-advertise-peer-urls: http://$private_ipv4:2380,http://$private_ipv4:7001
-    listen-peer-urls: http://$private_ipv4:2380,http://$private_ipv4:7001
-    initial-cluster: 7e82fe4fcbbd45bc9c88c8200ddc79ce=http://172.31.8.49:2380,7e82fe4fcbbd45bc9c88c8200ddc79ce=http://172.31.8.49:7001,e809fae3d04e4fa497d28291c4daa62e=http://172.31.8.48:2380,e809fae3d04e4fa497d28291c4daa62e=http://172.31.8.48:7001,a65904a857be4753abfc2ad8f4656e23=http://172.31.6.246:2380
-    initial-cluster-state: existing
   fleet:
     metadata: "role=node"
   units:
@@ -21,10 +14,23 @@ coreos:
           content: |
             [Socket]
             ListenStream="127.0.0.1:49153"
+    - name: docker-tcp.socket
+      command: start
+      enable: true
+      content: |
+        [Unit]
+        Description=Docker Socket for Remote API
+        
+        [Socket]
+        ListenStream=2376
+        BindIPv6Only=both
+        Service=docker.service
+        
+        [Install]
+        WantedBy=sockets.target
     - name: docker.service
       command: start
-      user: core
-    - name: users.mount
+    - name: Users.mount
       command: start
       content: |
         [Mount]
@@ -41,13 +47,3 @@ write_files:
     content: |
       ETCD_HOST=$private_ipv4
       ETCD_PORT=2379
-  - path: /home/core/.dockercfg
-    permissions: 0600
-    owner: core
-    content: |
-      {
-          "quay.io": {
-                  "auth": "b3BzZWUrb3BzZWVjaTpGNFE2RlJWMVpaT1FWV0hHVDNIU0gzSVlKOEFJOUYxUk5RWVVLTFFKUVpKVUU3MTFWSjZSSUJBVlg4VkJLV1lI",
-                  "email": "ci@opsee.co"
-          }
-      }
