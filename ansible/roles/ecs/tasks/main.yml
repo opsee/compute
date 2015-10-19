@@ -1,0 +1,3 @@
+---
+- include: new-cluster.yml
+  when: ecs_new_cluster is defined and ecs_new_cluster

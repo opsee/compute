@@ -1,0 +1,139 @@
+{% set comma1 = joiner(",") %}
+#cloud-config
+coreos:
+  etcd2:
+    name: {{item.availability_zone.name}}-worker-1
+    proxy: on
+    listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
+    advertise-client-urls: http://$private_ipv4:2379,http://$private_ipv4:4001
+    initial-advertise-peer-urls: http://$private_ipv4:2380,http://$private_ipv4:7001
+    listen-peer-urls: http://$private_ipv4:2380,http://$private_ipv4:7001
+    initial-cluster: {% for item in coreos_master_deployment %}{{comma1()}}{{item.availability_zone.name}}=http://{{item.private_ip}}:2380,{{item.availability_zone.name}}=http://{{item.private_ip}}:7001{% endfor %}
+
+    initial-cluster-state: new
+    initial-cluster-token: coreos-{{region}}
+    data-dir: /var/lib/etcd2
+  units:
+    - name: etcd.service
+      command: stop
+    - name: etcd2.service
+      command: start
+    - name: docker.service
+      command: start
+      user: core
+    - name: format-ebs.service
+      command: start
+      content: |
+        [Unit]
+        Description=Format ebs volume for docker.
+        After=dev-xvdb.device
+        Requires=dev-xvdb.device
+        [Service]
+        User=root
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/bin/bash -c '/usr/sbin/blkid /dev/xvdb | /usr/bin/grep -i uuid || (/usr/sbin/wipefs -f /dev/xvdb && /usr/sbin/mkfs.ext4 /dev/xvdb)'
+    - name: var-lib-docker.mount
+      command: start
+      content: |
+        [Unit]
+        Description=Mount ebs storage to /var/lib/docker
+        Requires=format-ebs.service
+        After=format-ebs.service
+        Before=docker.service
+        [Mount]
+        What=/dev/xvdb
+        Where=/var/lib/docker
+        Type=ext4
+    - name: cadvisor.service
+      command: start
+      content: |
+        [Unit]
+        Description=cAdvisor
+        After=docker.service
+        Requires=docker.service
+        [Service]
+        User=core
+        Restart=always
+        EnvironmentFile=/etc/environment
+        ExecStartPre=-/usr/bin/docker stop -t 2 cadvisor
+        ExecStartPre=-/usr/bin/docker rm cadvisor
+        ExecStartPre=/usr/bin/docker pull google/cadvisor
+        ExecStart=/usr/bin/docker run --volume=/:/rootfs:ro --volume=/var/run:/var/run:rw --volume=/sys:/sys:ro --volume=/var/lib/docker/:/var/lib/docker:ro --publish=10888:8080 --name=cadvisor google/cadvisor:latest
+        ExecStop=/usr/bin/docker stop -t 2 cadvisor
+    - name: docker-cleanup.service
+      command: start
+      content: |
+        [Unit]
+        Description=Docker Cleanup Service
+        Requires=docker.service
+        After=docker.service
+        [Service]
+        Type=oneshot
+        ExecStart=/bin/bash -c "/usr/bin/docker ps -aqf status=exited | /usr/bin/xargs /usr/bin/docker rm || exit 0"
+        ExecStart=/bin/bash -c "/usr/bin/docker images -q | /usr/bin/xargs /usr/bin/docker rmi || exit 0"
+    - name: docker-cleanup.timer
+      command: start
+      content: |
+        [Unit]
+        Description=Docker Cleanup Timer
+        Requires=docker.service
+        After=docker.service
+        [Timer]
+        OnBootSec=2m
+        OnUnitInactiveSec=1h
+        Unit=docker-cleanup.service
+    - name: registrator.service
+      command: start
+      content: |
+        [Unit]
+        Description=Registrator
+        After=etcd2.service docker.service
+        Requires=etcd2.service docker.service
+        [Service]
+        User=core
+        Restart=always
+        EnvironmentFile=/etc/environment
+        ExecStartPre=-/usr/bin/docker kill registrator
+        ExecStartPre=-/usr/bin/docker rm registrator
+        ExecStartPre=/usr/bin/docker pull gliderlabs/registrator
+        ExecStart=/usr/bin/docker run --volume /var/run/docker.sock:/tmp/docker.sock --hostname %H --add-host host:$private_ipv4 --name registrator gliderlabs/registrator -ip $private_ipv4 etcd://host:2379/opsee.co/registrator
+        ExecStop=/usr/bin/docker stop registrator
+    - name: ecs-{{ecs_cluster_name}}.service
+      command: start
+      content: |
+        [Unit]
+        Description=Amazon ECS Agent
+        Requires=network-online.target docker.service
+        After=network-online.target docker.service
+        [Service]
+        Environment=ECS_CLUSTER={{ecs_cluster_name}}
+        Environment=ECS_LOGLEVEL=warn
+        Environment=ECS_ENGINE_AUTH_TYPE=dockercfg
+        Environment=ECS_ENGINE_AUTH_DATA={"quay.io": { "auth": "b3BzZWUrb3BzZWVjaTpGNFE2RlJWMVpaT1FWV0hHVDNIU0gzSVlKOEFJOUYxUk5RWVVLTFFKUVpKVUU3MTFWSjZSSUJBVlg4VkJLV1lI", "email": "ci@opsee.com" } }
+        ExecStartPre=-/usr/bin/docker kill ecs-agent
+        ExecStartPre=-/usr/bin/docker rm ecs-agent
+        ExecStartPre=/usr/bin/docker pull amazon/amazon-ecs-agent
+        ExecStart=/usr/bin/docker run --name ecs-agent -e ECS_CLUSTER -e ECS_LOGLEVEL -e ECS_ENGINE_AUTH_TYPE -e ECS_ENGINE_AUTH_DATA --publish=127.0.0.1:51678:51678 --volume=/var/run/docker.sock:/var/run/docker.sock amazon/amazon-ecs-agent
+        ExecStop=/usr/bin/docker stop ecs-agent
+
+  update:
+    group: stable
+    reboot-strategy: etcd-lock
+write_files:
+  - path: /opt/etc/environment
+    permissions: 0644
+    owner: root
+    content: |
+      ETCD_HOST=$private_ipv4
+      ETCD_PORT=2379
+  - path: /home/core/.dockercfg
+    permissions: 0600
+    owner: core
+    content: |
+      {
+          "quay.io": {
+                  "auth": "b3BzZWUrb3BzZWVjaTpGNFE2RlJWMVpaT1FWV0hHVDNIU0gzSVlKOEFJOUYxUk5RWVVLTFFKUVpKVUU3MTFWSjZSSUJBVlg4VkJLV1lI",
+                  "email": "ci@opsee.co"
+          }
+      }

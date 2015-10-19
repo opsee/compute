@@ -1,0 +1,16 @@
+---
+- hosts: localhost
+  connection: local
+  vars_files:
+    - ../secrets/strongswan_users.yml
+    - ../vars/{{environment}}.yml
+
+  roles:
+    - role: strongswan
+      tags: strongswan
+    - role: ecs
+      ecs_new_cluster: yes
+      tags: ecs-cluster
+    - role: coreos
+      coreos_new_cluster: yes
+      tags: coreos-cluster

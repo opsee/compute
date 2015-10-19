@@ -1,0 +1,111 @@
+---
+- name: subnets for coreos cluster
+  ec2_vpc_subnet:
+    vpc_id: "{{vpc_id}}"
+    region: "{{region}}"
+    az: "{{item.key}}"
+    cidr: "{{item.value.cidr}}"
+    state: present
+    tags:
+      Name: "subnet-{{item.key}}"
+  with_dict: availability_zones
+
+- name: security group for ssh load balancer
+  ec2_group:
+    description: "ssh load balancer security group for {{region}}"
+    name: "{{coreos_ssh_elb_security_group}}"
+    region: "{{region}}"
+    vpc_id: "{{vpc_id}}"
+    state: present
+    rules:
+      - proto: tcp
+        from_port: 9122
+        to_port: 9122
+        cidr_ip: "{{vpc_subnet}}"
+
+- name: security group for internal coreos load balancers
+  ec2_group:
+    description: "internal coreos load balancer security group for {{region}}"
+    name: "{{coreos_internal_elb_security_group}}"
+    region: "{{region}}"
+    vpc_id: "{{vpc_id}}"
+    state: present
+    rules:
+      - proto: all
+        group_name: "{{coreos_security_group}}"
+        group_desc: tbd
+      - proto: all
+        group_name: "{{coreos_internal_elb_security_group}}"
+      - proto: all
+        group_name: "{{coreos_vpn_security_group}}"
+
+- name: security group for coreos cluster
+  ec2_group:
+    description: "coreos node security group for {{region}}"
+    name: "{{coreos_security_group}}"
+    region: "{{region}}"
+    vpc_id: "{{vpc_id}}"
+    state: present
+    rules:
+      - proto: all
+        group_name: "{{coreos_security_group}}"
+      - proto: all
+        group_name: "{{coreos_internal_elb_security_group}}"
+      - proto: all
+        group_name: "{{coreos_vpn_security_group}}"
+
+- name: keypair for coreos
+  ec2_key:
+    name: "{{coreos_keypair}}"
+    region: "{{region}}"
+    state: present
+    wait: yes
+
+- name: coreos etcd master nodes
+  ec2:
+    user_data: "{{ lookup('template', 'master.cloud-config.j2') }}"
+    assign_public_ip: yes
+    instance_profile_name: "{{coreos_instance_profile}}"
+    instance_tags:
+      Name: CoreOS etcd master {{item.availability_zone.name}}
+    count_tag:
+      Name: CoreOS etcd master {{item.availability_zone.name}}
+    exact_count: 1
+    group: "{{coreos_security_group}}"
+    image: "{{coreos_ami}}"
+    instance_type: "{{coreos_master_instance_type}}"
+    key_name: "{{coreos_keypair}}"
+    region: "{{region}}"
+    vpc_subnet_id: "{{item.availability_zone.subnet_id}}"
+    private_ip: "{{item.private_ip}}"
+    zone: "{{item.availability_zone.name}}"
+    volumes:
+      - device_name: /dev/sdb
+        delete_on_termination: no
+        volume_type: gp2
+        volume_size: 30
+  with_items: coreos_master_deployment
+
+- name: coreos / ecs worker nodes
+  ec2:
+    user_data: "{{ lookup('template', 'worker.cloud-config.j2') }}"
+    assign_public_ip: yes
+    instance_profile_name: "{{coreos_instance_profile}}"
+    instance_tags:
+      Name: CoreOS worker {{item.availability_zone.name}}
+    count_tag:
+      Name: CoreOS worker {{item.availability_zone.name}}
+    exact_count: 1
+    group: "{{coreos_security_group}}"
+    image: "{{coreos_ami}}"
+    instance_type: "{{coreos_worker_instance_type}}"
+    key_name: "{{coreos_keypair}}"
+    region: "{{region}}"
+    vpc_subnet_id: "{{item.availability_zone.subnet_id}}"
+    zone: "{{item.availability_zone.name}}"
+    volumes:
+      - device_name: /dev/sdb
+        delete_on_termination: no
+        volume_type: gp2
+        volume_size: 30
+  with_items: coreos_worker_deployment
