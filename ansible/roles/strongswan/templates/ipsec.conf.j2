@@ -1,0 +1,44 @@
+# ipsec.conf - strongSwan IPsec configuration file
+
+config setup
+        charonstart=yes
+        plutostart=no
+        # strictcrlpolicy=yes
+        # uniqueids = no
+
+conn %default
+        ikelifetime=60m
+        keylife=20m
+        rekeymargin=3m
+        keyingtries=1
+        keyexchange=ikev2
+        authby=secret
+
+conn client
+        # The leftid parameter is not a real DNS name
+        leftid={{strongswan_gateway_name}}
+        # The "left" parameter is the gateway private IP
+        left={{strongswan_gateway_ip}}
+        # We are protecting the entire VPC, not just this subnet
+        leftsubnet={{strongswan_gateway_subnet}}
+        leftfirewall=yes
+        right=%any
+        rightsourceip={{strongswan_client_subnet}}
+        auto=add
+
+#conn sample-self-signed
+#      leftsubnet=10.1.0.0/16
+#      leftcert=selfCert.der
+#      leftsendcert=never
+#      right=192.168.0.2
+#      rightsubnet=10.2.0.0/16
+#      rightcert=peerCert.der
+#      auto=start
+
+#conn sample-with-ca-cert
+#      leftsubnet=10.1.0.0/16
+#      leftcert=myCert.pem
+#      right=192.168.0.2
+#      rightsubnet=10.2.0.0/16
+#      rightid="C=CH, O=Linux strongSwan CN=peer name"
+#      auto=start

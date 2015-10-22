@@ -1,0 +1,9 @@
+---
+- hosts: localhost
+  connection: local
+  vars_files:
+    - ../vars/{{environment}}.yml
+
+  roles:
+    - role: coreos
+      coreos_update_userdata: yes

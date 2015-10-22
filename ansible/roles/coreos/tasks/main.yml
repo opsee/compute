@@ -1,0 +1,6 @@
+---
+- include: new-cluster.yml
+  when: coreos_new_cluster is defined and coreos_new_cluster
+
+- include: update-userdata.yml
+  when: coreos_update_userdata is defined and coreos_update_userdata

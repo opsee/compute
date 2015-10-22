@@ -1,0 +1,22 @@
+---
+# - name: fucking userdata
+#   vars:
+#     item: "{{coreos_master_deployment[0]}}"
+#   debug:
+#     var: "{{ lookup('template', 'master.cloud-config.j2') }}"
+
+- name: reload master userdata
+  ec2_userdata:
+    user_data: "{{ lookup('template', 'master.cloud-config.j2') }}"
+    private_ip: "{{item.private_ip}}"
+    vpc_id: "{{vpc_id}}"
+    region: "{{region}}"
+  with_items: coreos_master_deployment
+
+- name: reload worker userdata
+  ec2_userdata:
+    user_data: "{{ lookup('template', 'worker.cloud-config.j2') }}"
+    availability_zone: "{{item.availability_zone.name}}"
+    vpc_id: "{{vpc_id}}"
+    region: "{{region}}"
+  with_items: coreos_worker_deployment

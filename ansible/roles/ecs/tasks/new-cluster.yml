@@ -1,0 +1,5 @@
+---
+- name: create ecs cluster
+  ecs_cluster:
+    name: "{{ecs_cluster_name}}"
+    state: present
