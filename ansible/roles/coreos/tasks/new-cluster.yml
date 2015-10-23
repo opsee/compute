@@ -39,6 +39,19 @@
       - proto: all
         group_name: "{{coreos_vpn_security_group}}"
 
+- name: security group for public coreos load balancers
+  ec2_group:
+    description: "public coreos load balancer security group for {{region}}"
+    name: "{{coreos_public_elb_security_group}}"
+    region: "{{region}}"
+    vpc_id: "{{vpc_id}}"
+    state: present
+    rules:
+      - proto: tcp
+        cidr_ip: "0.0.0.0/0"
+        from_port: 443
+        to_port: 443
+
 - name: security group for coreos cluster
   ec2_group:
     description: "coreos node security group for {{region}}"

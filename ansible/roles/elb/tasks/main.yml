@@ -1,0 +1,14 @@
+---
+- name: load balancers for services
+  ec2_elb_lb:
+    connection_draining_timeout: 300
+    cross_az_load_balancing: yes
+    health_check: "{{item.value.health_check}}"
+    listeners: "{{item.value.listeners}}"
+    name: "{{item.value.name}}"
+    region: "{{region}}"
+    scheme: "{{item.value.scheme|default('internal')}}"
+    security_group_names: "{{item.value.security_groups}}"
+    state: present
+    subnets: "{{availability_zones|dict_values|map(attribute='subnet_id')|list}}"
+  with_dict: elb_load_balancers
