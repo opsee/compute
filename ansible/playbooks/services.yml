@@ -1,0 +1,10 @@
+---
+- hosts: localhost
+  connection: local
+  vars_files:
+    - ../secrets/databases.yml
+    - ../vars/{{environment}}.yml
+
+  roles:
+    - role: rds
+    - role: elb

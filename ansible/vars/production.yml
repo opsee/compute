@@ -17,6 +17,10 @@ availability_zones:
     subnet_id: subnet-b233aeeb
     cidr: "172.30.32.0/20"
     name: us-west-2c
+server_certificate_ids:
+  opsy_co: arn:aws:iam::933693344490:server-certificate/OpsyCoWildcard
+  opsee_co: arn:aws:iam::933693344490:server-certificate/OpseeCoWildcard
+  opsee_com: arn:aws:iam::933693344490:server-certificate/cloudfront/OpseeComWildcard
 
 # strongswan vpn
 strongswan_gateway_name: "{{region}}.vpn.opsee.com"
@@ -38,6 +42,7 @@ coreos_security_group: "CoreOS cluster {{region}}"
 coreos_vpn_security_group: "{{strongswan_security_group}}"
 coreos_ssh_elb_security_group: "CoreOS cluster ssh ELB {{region}}"
 coreos_internal_elb_security_group: "CoreOS cluster internal ELB {{region}}"
+coreos_public_elb_security_group: "CoreOS cluster public ELB {{region}}"
 coreos_keypair: "CoreOS cluster keypair {{region}}"
 coreos_instance_profile: CoreOS_Cluster_Role
 coreos_ami: ami-ed8b90dd
@@ -53,3 +58,211 @@ coreos_master_deployment:
 coreos_worker_deployment:
   - availability_zone: "{{availability_zones['us-west-2a']}}"
   - availability_zone: "{{availability_zones['us-west-2b']}}"
+
+# databases
+rds_security_group: "RDS {{region}}"
+rds_instances:
+  fieri:
+    db_engine: postgres
+    db_name: fieri
+    instance_type: db.m3.medium
+    multi_zone: no
+    size: 100
+    username: fieri
+  vape:
+    db_engine: postgres
+    db_name: vape
+    instance_type: db.m3.medium
+    multi_zone: no
+    size: 100
+    username: vape
+  bartnet:
+    db_engine: postgres
+    db_name: bartnet
+    instance_type: db.m3.medium
+    multi_zone: no
+    size: 100
+    username: bartnet
+  beavis:
+    db_engine: postgres
+    db_name: beavis
+    instance_type: db.m3.medium
+    multi_zone: no
+    size: 100
+    username: beavis
+
+# load balancers
+elb_load_balancers:
+  etcd:
+    name: etcd
+    health_check:
+      ping_protocol: http
+      ping_port: 2379
+      ping_path: "/health"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: https
+        load_balancer_port: 443
+        instance_port: 2379
+        ssl_certificate_id: "{{server_certificate_ids.opsy_co}}"
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
+  fieri:
+    name: fieri
+    health_check:
+      ping_protocol: http
+      ping_port: 9092
+      ping_path: "/health"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: https
+        load_balancer_port: 443
+        instance_port: 9092
+        ssl_certificate_id: "{{server_certificate_ids.opsy_co}}"
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
+  vape_private:
+    name: vape-private
+    health_check:
+      ping_protocol: http
+      ping_port: 9091
+      ping_path: "/health"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: https
+        load_balancer_port: 443
+        instance_port: 9091
+        ssl_certificate_id: "{{server_certificate_ids.opsy_co}}"
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
+  beavis:
+    name: beavis
+    health_check:
+      ping_protocol: http
+      ping_port: 2020
+      ping_path: "/health_check"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: https
+        load_balancer_port: 443
+        instance_port: 2020
+        ssl_certificate_id: "{{server_certificate_ids.opsy_co}}"
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
+  bartnet:
+    name: bartnet
+    health_check:
+      ping_protocol: http
+      ping_port: 8080
+      ping_path: "/health_check"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: https
+        load_balancer_port: 443
+        instance_port: 8080
+        ssl_certificate_id: "{{server_certificate_ids.opsy_co}}"
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
+  nsqd:
+    name: nsqd
+    health_check:
+      ping_protocol: tcp
+      ping_port: 4150
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: tcp
+        load_balancer_port: 4150
+        instance_port: 4150
+      - protocol: http
+        load_balancer_port: 4151
+        instance_port: 4151
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
+  nsqadmin:
+    name: nsqadmin
+    health_check:
+      ping_protocol: http
+      ping_port: 4171
+      ping_path: "/"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: http
+        load_balancer_port: 80
+        instance_port: 4171
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
+  emissary:
+    name: emissary
+    health_check:
+      ping_protocol: http
+      ping_port: 80
+      ping_path: "/index.html"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: https
+        load_balancer_port: 443
+        instance_port: 80
+        ssl_certificate_id: "{{server_certificate_ids.opsee_com}}"
+    security_groups:
+      - "{{coreos_public_elb_security_group}}"
+    scheme: internet-facing
+  vape_public:
+    name: vape-public
+    health_check:
+      ping_protocol: http
+      ping_port: 8081
+      ping_path: "/health"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: https
+        load_balancer_port: 443
+        instance_port: 8081
+        ssl_certificate_id: "{{server_certificate_ids.opsee_com}}"
+    security_groups:
+      - "{{coreos_public_elb_security_group}}"
+    scheme: internet-facing
+  motorn:
+    name: motorn
+    health_check:
+      ping_protocol: http
+      ping_port: 8083
+      ping_path: "/health"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: https
+        load_balancer_port: 443
+        instance_port: 8083
+        ssl_certificate_id: "{{server_certificate_ids.opsee_com}}"
+    security_groups:
+      - "{{coreos_public_elb_security_group}}"
+    scheme: internet-facing

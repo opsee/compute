@@ -1,0 +1,50 @@
+---
+- name: rds security group
+  ec2_group:
+    description: "database security group for {{region}}"
+    name: "{{rds_security_group}}"
+    region: "{{region}}"
+    vpc_id: "{{vpc_id}}"
+    state: present
+    rules:
+      - proto: tcp
+        from_port: 5432
+        to_port: 5432
+        cidr_ip: "{{vpc_subnet}}"
+  register: rds_security_group_result
+
+- name: rds subnet group
+  rds_subnet_group:
+    description: rds subnet group for {{region}}
+    name: rds {{region}}
+    region: "{{region}}"
+    state: present
+    subnets: "{{availability_zones|dict_values|map(attribute='subnet_id')|list}}"
+
+- name: get subnet group
+  rds_subnet_group_facts:
+    vpc_id: "{{vpc_id}}"
+    region: "{{region}}"
+    name: rds {{region}}
+  register: rds_subnet_group_facts
+
+- debug:
+    var: rds_security_group_result
+
+
+- name: rds instances
+  rds:
+    command: create
+    db_engine: "{{item.value.db_engine}}"
+    db_name: "{{item.value.db_name}}"
+    instance_name: "{{item.key}}"
+    instance_type: "{{item.value.instance_type}}"
+    multi_zone: "{{item.value.multi_zone}}"
+    password: "{{database_passwords[item.key]}}"
+    publicly_accessible: no
+    region: "{{region}}"
+    vpc_security_groups: "{{rds_security_group_result.group_id}}"
+    size: "{{item.value.size}}"
+    username: "{{item.value.username}}"
+    subnet: rds {{region}}
+  with_dict: rds_instances
