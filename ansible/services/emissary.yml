@@ -1,0 +1,18 @@
+load_balancer:
+  name: emissary
+  health_check:
+    ping_protocol: http
+    ping_port: 80
+    ping_path: "/index.html"
+    response_timeout: 2
+    interval: 5
+    unhealthy_threshold: 2
+    healthy_threshold: 5
+  listeners:
+    - protocol: https
+      load_balancer_port: 443
+      instance_port: 80
+      ssl_certificate_id: "{{public_certificate}}"
+  security_groups:
+    - "{{coreos_public_elb_security_group}}"
+  scheme: internet-facing

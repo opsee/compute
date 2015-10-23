@@ -1,0 +1,6 @@
+dependencies:
+  - role: rds
+  - role: elb
+  - role: ecs
+    ecs_register_tasks: yes
+    ecs_create_services: yes

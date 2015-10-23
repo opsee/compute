@@ -1,0 +1,34 @@
+---
+- name: set the services env
+  set_fact:
+    opsee_services_env: "{{lookup('env', 'SERVICES')|default('none')}}"
+
+- name: fail when we don't specify services
+  fail:
+    msg: Need to specify what services to provision with the SERVICES env var (comma delimited). If all, then specify SERVICES=all.
+  when: opsee_services_env == 'none' or opsee_services_env == ''
+
+- name: set the services glob
+  set_fact:
+    opsee_services_glob: ["../services/*.yml"]
+  when: opsee_services_env == 'all'
+
+- name: set the services glob
+  set_fact:
+    opsee_services_glob: ["../services/{{opsee_services_env}}.yml"]
+  when: opsee_services_env != 'all' and opsee_services_env.split(',')|length == 1
+
+- name: set the services glob
+  set_fact:
+    opsee_services_glob: "{{opsee_services_glob + ['../services/' + item + '.yml']}}"
+  when: opsee_services_env.split(',')|length > 1
+  with_items: opsee_services_env.split(',')
+  vars:
+    opsee_services_glob: []
+
+- name: load opsee services
+  set_fact:
+    opsee_services: "{{opsee_services|combine({(item | basename | splitext | first): (lookup('file', item) | from_yaml)})}}"
+  with_fileglob: opsee_services_glob
+  vars:
+    opsee_services: {}
