@@ -1,4 +1,4 @@
-{% set comma1 = joiner(",") %}
+{% set comma1 = joiner(",") %}{% set comma2 = joiner(",") %}
 #cloud-config
 coreos:
   etcd2:
@@ -44,6 +44,39 @@ coreos:
         What=/dev/xvdb
         Where=/var/lib/etcd2-container
         Type=ext4
+    - name: app-etcd2.service
+      command: start
+      content: |
+        [Unit]
+        Description=etcd2 container for app use
+        After=docker.service
+        Requires=docker.service
+        [Service]
+        User=core
+        Restart=always
+        EnvironmentFile=/etc/environment
+        ExecStartPre=-/usr/bin/docker stop -t 2 app-etcd2
+        ExecStartPre=-/usr/bin/docker rm app-etcd2
+        ExecStartPre=/usr/bin/docker pull quay.io/coreos/etcd:latest
+        ExecStart=/usr/bin/docker run --volume=/var/lib/etcd2-container:/var/lib/etcd2 -p 4101:4101 -p 2480:2480 -p 2479:2479 --name=app-etcd2 quay.io/coreos/etcd:latest -name app-etcd-{{item.availability_zone.name}} -listen-client-urls http://0.0.0.0:2479,http://0.0.0.0:4101 -advertise-client-urls http://$private_ipv4:2479,http://$private_ipv4:4101 -initial-advertise-peer-urls http://$private_ipv4:2480 -listen-peer-urls http://0.0.0.0:2480 -initial-cluster {% for item in coreos_master_deployment %}{{comma2()}}app-etcd-{{item.availability_zone.name}}=http://{{item.private_ip}}:2480{% endfor %} -initial-cluster-state new -initial-cluster-token app-etcd2-{{region}} -data-dir /var/lib/etcd2
+        ExecStop=/usr/bin/docker stop -t 2 app-etcd2
+    - name: app-etcd2-elb.service
+      command: start
+      content: |
+        [Unit]
+        Description=app-etcd2 ELB Registration
+        After=docker.service
+        Requires=docker.service
+        PartOf=app-etcd2.service
+        [Service]
+        User=core
+        Restart=always
+        TimeoutStartSec=0
+        ExecStartPre=-/usr/bin/docker stop -t 5 app-etcd2-elb
+        ExecStartPre=-/usr/bin/docker rm app-etcd2-elb
+        ExecStartPre=/usr/bin/docker pull quay.io/coreos/elb-presence:latest
+        ExecStart=/usr/bin/docker run --rm --name app-etcd2-elb -e AWS_REGION={{region}} -e ELB_NAME=etcd quay.io/coreos/elb-presence
+        ExecStop=/usr/bin/docker stop -t 5 app-etcd2-elb
     - name: cadvisor.service
       command: start
       content: |
