@@ -23,7 +23,7 @@
       set_fact:
         elb_load_balancers: "{{elb_load_balancers|combine({item.key: item.value.load_balancer})}}"
       with_dict: opsee_services
-      when: item.value.db_instance is defined
+      when: item.value.load_balancer is defined
 
   roles:
     - role: rds

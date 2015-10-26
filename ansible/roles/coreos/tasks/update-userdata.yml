@@ -12,6 +12,7 @@
     vpc_id: "{{vpc_id}}"
     region: "{{region}}"
   with_items: coreos_master_deployment
+  tags: [master]
 
 - name: reload worker userdata
   ec2_userdata:
@@ -20,3 +21,4 @@
     vpc_id: "{{vpc_id}}"
     region: "{{region}}"
   with_items: coreos_worker_deployment
+  tags: [worker]
