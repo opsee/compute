@@ -1,0 +1,18 @@
+load_balancer:
+  name: nsqd
+  health_check:
+    ping_protocol: tcp
+    ping_port: 4150
+    response_timeout: 2
+    interval: 5
+    unhealthy_threshold: 2
+    healthy_threshold: 5
+  listeners:
+    - protocol: tcp
+      load_balancer_port: 4150
+      instance_port: 4150
+    - protocol: http
+      load_balancer_port: 4151
+      instance_port: 4151
+  security_groups:
+    - "{{coreos_internal_elb_security_group}}"

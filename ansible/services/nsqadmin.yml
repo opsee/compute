@@ -1,0 +1,16 @@
+load_balancer:
+  name: nsqadmin
+  health_check:
+    ping_protocol: http
+    ping_port: 4171
+    ping_path: "/"
+    response_timeout: 2
+    interval: 5
+    unhealthy_threshold: 2
+    healthy_threshold: 5
+  listeners:
+    - protocol: http
+      load_balancer_port: 80
+      instance_port: 4171
+  security_groups:
+    - "{{coreos_internal_elb_security_group}}"

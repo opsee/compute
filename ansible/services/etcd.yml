@@ -1,0 +1,41 @@
+load_balancer:
+  name: etcd
+  health_check:
+    ping_protocol: http
+    ping_port: 2479
+    ping_path: "/health"
+    response_timeout: 2
+    interval: 5
+    unhealthy_threshold: 2
+    healthy_threshold: 5
+  listeners:
+    - protocol: https
+      load_balancer_port: 443
+      instance_port: 2479
+      ssl_certificate_id: "{{internal_certificate}}"
+  security_groups:
+    - "{{coreos_internal_elb_security_group}}"
+
+task:
+  family: etcd
+  containerDefinitions:
+    - name: etcd
+      image: quay.io/coreos/etcd:{{ecs_image_tag}}
+      memory: 32,
+      portMappings:
+        - hostPort: 9092
+          containerPort: 9092
+          protocol: tcp
+      command:
+        - "-name "
+
+service:
+  cluster: "{{environment}}"
+  serviceName: etcd
+  taskDefinition: etcd
+  loadBalancers:
+    - loadBalancerName: etcd
+      containerName: etcd
+      containerPort: 2479
+  desiredCount: 2
+  role: "{{ecs_role}}"

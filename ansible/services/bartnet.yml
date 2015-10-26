@@ -1,0 +1,25 @@
+load_balancer:
+  name: bartnet
+  health_check:
+    ping_protocol: http
+    ping_port: 8080
+    ping_path: "/health_check"
+    response_timeout: 2
+    interval: 5
+    unhealthy_threshold: 2
+    healthy_threshold: 5
+  listeners:
+    - protocol: https
+      load_balancer_port: 443
+      instance_port: 8080
+      ssl_certificate_id: "{{internal_certificate}}"
+  security_groups:
+    - "{{coreos_internal_elb_security_group}}"
+
+db_instance:
+  db_engine: postgres
+  db_name: bartnet
+  instance_type: db.m3.medium
+  multi_zone: no
+  size: 100
+  username: bartnet

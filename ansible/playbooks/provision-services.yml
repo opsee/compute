@@ -1,0 +1,30 @@
+---
+- hosts: localhost
+  connection: local
+
+  vars:
+    rds_instances: {}
+    elb_load_balancers: {}
+
+  vars_files:
+    - ../secrets/databases.yml
+    - ../environments/{{environment}}.yml
+
+  pre_tasks:
+    - include: opsee-services-loader.yml
+
+    - name: set rds instances
+      set_fact:
+        rds_instances: "{{rds_instances|combine({item.key: item.value.db_instance})}}"
+      with_dict: opsee_services
+      when: item.value.db_instance is defined
+
+    - name: set load balancers
+      set_fact:
+        elb_load_balancers: "{{elb_load_balancers|combine({item.key: item.value.load_balancer})}}"
+      with_dict: opsee_services
+      when: item.value.db_instance is defined
+
+  roles:
+    - role: rds
+    - role: elb

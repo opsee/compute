@@ -1,0 +1,36 @@
+---
+- hosts: localhost
+  connection: local
+  vars:
+    ecs_tasks: {}
+    ecs_services: {}
+    ecs_image_tag: "{{lookup('env', 'IMAGE_TAG')}}"
+
+  vars_files:
+    - ../secrets/databases.yml
+    - ../environments/{{environment}}.yml
+
+  pre_tasks:
+    - include: opsee-services-loader.yml
+
+    - name: set the image tag
+      set_fact:
+        ecs_image_tag: latest
+      when: ecs_image_tag == "" or ecs_image_tag is None
+
+    - name: set ecs tasks
+      set_fact:
+        ecs_tasks: "{{ecs_tasks|combine({item.key: item.value.task})}}"
+      with_dict: opsee_services
+      when: item.value.task is defined
+
+    - name: set ecs services
+      set_fact:
+        ecs_services: "{{ecs_services|combine({item.key: item.value.service})}}"
+      with_dict: opsee_services
+      when: item.value.service is defined
+
+  roles:
+    - role: ecs
+      ecs_register_tasks: yes
+      ecs_register_services: yes

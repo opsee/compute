@@ -1,3 +1,9 @@
 ---
 - include: new-cluster.yml
   when: ecs_new_cluster is defined and ecs_new_cluster
+
+- include: register-tasks.yml
+  when: ecs_register_tasks is defined and ecs_register_tasks
+
+- include: create-services.yml
+  when: ecs_create_services is defined and ecs_create_services
