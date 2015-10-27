@@ -5,8 +5,9 @@ import boto3, time
 def update_instance(module):
     vpc_id            = module.params.get('vpc_id')
     private_ip        = module.params.get('private_ip')
-    availability_zone = module.params.get('availability_zone')
+    tags              = module.params.get('tags')
     user_data         = module.params.get('user_data')
+    wait_extra        = module.params.get('wait')
     region            = module.params.get('region')
     ec2               = boto3.resource('ec2', region_name=region)
 
@@ -15,13 +16,14 @@ def update_instance(module):
             {'Name': 'private-ip-address', 'Values': [private_ip]},
             {'Name': 'vpc-id', 'Values': [vpc_id]}
         ]
-    elif availability_zone:
-        filters = [
-            {'Name': 'availability-zone', 'Values': [availability_zone]},
-            {'Name': 'vpc-id', 'Values': [vpc_id]}
-        ]
+    elif tags:
+        filters = []
+        for k, v in tags.items():
+            filters.append({'Name': 'tag:'+k, 'Values': [v]})
 
-    for instance in ec2.instances.filter(Filters=filters, MaxResults=6):
+        filters.append({'Name': 'vpc-id', 'Values': [vpc_id]})
+
+    for instance in ec2.instances.filter(Filters=filters):
         current_user_data = instance.describe_attribute(Attribute='userData')['UserData']
         if user_data == current_user_data:
             return False, instance
@@ -32,6 +34,9 @@ def update_instance(module):
         instance.start()
         instance.wait_until_running()
 
+        if wait_extra:
+            time.sleep(wait_extra)
+
         return True, instance
 
     module.fail_json(msg='No instances found.')
@@ -41,7 +46,8 @@ def main():
         argument_spec = dict(
             user_data         = dict(required=True),
             private_ip        = dict(),
-            availability_zone = dict(),
+            tags              = dict(),
+            wait              = dict(type='int'),
             vpc_id            = dict(required=True),
             region            = dict(required=True)
         )

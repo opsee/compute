@@ -1,25 +1,57 @@
-load_balancer:
-  name: beavis
-  health_check:
-    ping_protocol: http
-    ping_port: 2020
-    ping_path: "/health_check"
-    response_timeout: 2
-    interval: 5
-    unhealthy_threshold: 2
-    healthy_threshold: 5
-  listeners:
-    - protocol: https
-      load_balancer_port: 443
-      instance_port: 2020
-      ssl_certificate_id: "{{internal_certificate}}"
-  security_groups:
-    - "{{coreos_internal_elb_security_group}}"
+load_balancers:
+  - name: beavis
+    health_check:
+      ping_protocol: http
+      ping_port: 2020
+      ping_path: "/health_check"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: https
+        load_balancer_port: 443
+        instance_protocol: http
+        instance_port: 2020
+        ssl_certificate_id: "{{internal_certificate}}"
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
 
-db_instance:
-  db_engine: postgres
-  db_name: beavis
-  instance_type: db.m3.medium
-  multi_zone: no
-  size: 100
-  username: beavis
+db_instances:
+  - db_engine: postgres
+    db_name: beavis
+    instance_type: db.m3.medium
+    multi_zone: no
+    size: 100
+    username: beavis
+
+dns_records:
+  - record: beavis
+    load_balancer_name: beavis
+    internal: yes
+
+tasks:
+  - family: beavis
+    containerDefinitions:
+      - name: beavis
+        image: quay.io/opsee/beavis:{{ecs_image_tag}}
+        memory: 1024
+        environment:
+          - name: APPENV
+            value: beavisenv-{{environment}}-{{region}}
+        portMappings:
+          - hostPort: 2020
+            containerPort: 2020
+            protocol: tcp
+        command:
+          - migrate-start
+
+services:
+  - serviceName: beavis
+    taskDefinition: beavis
+    loadBalancers:
+      - loadBalancerName: beavis
+        containerName: beavis
+        containerPort: 2020
+    desiredCount: 2
+    role: "{{ecs_role}}"

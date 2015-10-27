@@ -1,0 +1,6 @@
+---
+- name: create zones
+  route53_zone:
+    state: present
+    zone: "{{item}}"
+  with_items: route53_zones

@@ -12,7 +12,7 @@
 
 - name: security group for ssh load balancer
   ec2_group:
-    description: "ssh load balancer security group for {{region}}"
+    description: "ssh load balancer security group for {{environment_region}}"
     name: "{{coreos_ssh_elb_security_group}}"
     region: "{{region}}"
     vpc_id: "{{vpc_id}}"
@@ -25,7 +25,7 @@
 
 - name: security group for internal coreos load balancers
   ec2_group:
-    description: "internal coreos load balancer security group for {{region}}"
+    description: "internal coreos load balancer security group for {{environment_region}}"
     name: "{{coreos_internal_elb_security_group}}"
     region: "{{region}}"
     vpc_id: "{{vpc_id}}"
@@ -38,10 +38,13 @@
         group_name: "{{coreos_internal_elb_security_group}}"
       - proto: all
         group_name: "{{coreos_vpn_security_group}}"
+      - proto: all
+        group_name: "{{bastion_vpn_security_group}}"
+        group_desc: tbd
 
 - name: security group for public coreos load balancers
   ec2_group:
-    description: "public coreos load balancer security group for {{region}}"
+    description: "public coreos load balancer security group for {{environment_region}}"
     name: "{{coreos_public_elb_security_group}}"
     region: "{{region}}"
     vpc_id: "{{vpc_id}}"
@@ -54,7 +57,7 @@
 
 - name: security group for coreos cluster
   ec2_group:
-    description: "coreos node security group for {{region}}"
+    description: "coreos node security group for {{environment_region}}"
     name: "{{coreos_security_group}}"
     region: "{{region}}"
     vpc_id: "{{vpc_id}}"
@@ -66,6 +69,8 @@
         group_name: "{{coreos_internal_elb_security_group}}"
       - proto: all
         group_name: "{{coreos_vpn_security_group}}"
+      - proto: all
+        group_name: "{{coreos_public_elb_security_group}}"
 
 - name: keypair for coreos
   ec2_key:
@@ -80,9 +85,11 @@
     assign_public_ip: yes
     instance_profile_name: "{{coreos_instance_profile}}"
     instance_tags:
-      Name: CoreOS etcd master {{item.availability_zone.name}}
+      Name: "CoreOS master {{environment}} {{item.availability_zone.name}}"
+      Environment: "{{environment}}"
+      Role: "{{item.availability_zone.name}} master"
     count_tag:
-      Name: CoreOS etcd master {{item.availability_zone.name}}
+      Role: "{{item.availability_zone.name}} master"
     exact_count: 1
     group: "{{coreos_security_group}}"
     image: "{{coreos_ami}}"
@@ -105,10 +112,12 @@
     assign_public_ip: yes
     instance_profile_name: "{{coreos_instance_profile}}"
     instance_tags:
-      Name: CoreOS worker {{item.availability_zone.name}}
+      Name: "CoreOS worker {{environment}} {{item.availability_zone.name}}"
+      Environment: "{{environment}}"
+      Role: "{{item.availability_zone.name}} worker"
     count_tag:
-      Name: CoreOS worker {{item.availability_zone.name}}
-    exact_count: 1
+      Role: "{{item.availability_zone.name}} worker"
+    exact_count: "{{item.count}}"
     group: "{{coreos_security_group}}"
     image: "{{coreos_ami}}"
     instance_type: "{{coreos_worker_instance_type}}"

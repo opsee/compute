@@ -1,0 +1,17 @@
+tasks:
+  - family: bastion-connect
+    containerDefinitions:
+      - name: bastion-connect
+        image: quay.io/opsee/zuul:{{ecs_image_tag}}
+        memory: 32
+        command:
+          - connect
+          - "--etcd-address=etcd.{{internal_domain}}:2479"
+          - "--nsqlookupd-tcp-address=nsqlookupd.{{internal_domain}}:4161"
+
+services:
+  - serviceName: bastion-connect
+    taskDefinition: bastion-connect
+    loadBalancers: []
+    desiredCount: 2
+    role: "{{ecs_role}}"

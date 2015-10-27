@@ -1,0 +1,69 @@
+---
+- name: keypair for bastion vpn
+  ec2_key:
+    name: "{{bastion_vpn_keypair}}"
+    region: "{{region}}"
+    state: present
+    wait: yes
+
+- name: bastion vpn security group
+  ec2_group:
+    description: "bastion vpn security group for {{environment_region}}"
+    name: "{{bastion_vpn_security_group}}"
+    region: "{{region}}"
+    state: present
+    vpc_id: "{{vpc_id}}"
+    rules:
+      - proto: udp
+        from_port: 1194
+        to_port: 1194
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 1194
+        to_port: 1194
+        cidr_ip: 0.0.0.0/0
+      - proto: all
+        group_name: "{{coreos_vpn_security_group}}"
+      - proto: all
+        group_name: "{{coreos_security_group}}"
+
+- name: coreos bastion vpn node
+  ec2:
+    vpc_subnet_id: "{{bastion_vpn_instance_subnet_id}}"
+    user_data: "{{ lookup('template', 'bastion-vpn.cloud-config.j2') }}"
+    assign_public_ip: no
+    source_dest_check: no
+    instance_profile_name: "{{bastion_vpn_instance_profile}}"
+    instance_tags:
+      Name: "bastion-vpn {{environment_region}}"
+      Environment: "{{environment}}"
+    count_tag:
+      Name: "bastion-vpn {{environment_region}}"
+    exact_count: 1
+    group: "{{bastion_vpn_security_group}}"
+    image: "{{coreos_ami}}"
+    instance_type: "{{bastion_vpn_instance_type}}"
+    key_name: "{{bastion_vpn_keypair}}"
+    region: "{{region}}"
+    private_ip: "{{bastion_vpn_gateway_ip}}"
+    wait: yes
+  register: node_result
+
+- name: elastic ip for bastion vpn
+  ec2_eip:
+    public_ip: "{{bastion_vpn_public_ip}}"
+    device_id: "{{node_result.tagged_instances[0].id}}"
+    in_vpc: yes
+    region: "{{region}}"
+    state: present
+
+- name: dns name for bastion vpn
+  route53:
+    command: create
+    overwrite: no
+    private_zone: no
+    record: "{{bastion_vpn_host}}"
+    type: A
+    value: "{{bastion_vpn_public_ip}}"
+    zone: "{{public_domain}}"
+  ignore_errors: yes # burn in again, module author

@@ -11,14 +11,17 @@
     private_ip: "{{item.private_ip}}"
     vpc_id: "{{vpc_id}}"
     region: "{{region}}"
+    wait: 120
   with_items: coreos_master_deployment
   tags: [master]
 
 - name: reload worker userdata
   ec2_userdata:
     user_data: "{{ lookup('template', 'worker.cloud-config.j2') }}"
-    availability_zone: "{{item.availability_zone.name}}"
+    tags:
+      Role: "{{item.availability_zone.name}} worker"
     vpc_id: "{{vpc_id}}"
     region: "{{region}}"
+    wait: 120
   with_items: coreos_worker_deployment
   tags: [worker]

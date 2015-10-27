@@ -1,16 +1,46 @@
-load_balancer:
-  name: nsqadmin
-  health_check:
-    ping_protocol: http
-    ping_port: 4171
-    ping_path: "/"
-    response_timeout: 2
-    interval: 5
-    unhealthy_threshold: 2
-    healthy_threshold: 5
-  listeners:
-    - protocol: http
-      load_balancer_port: 80
-      instance_port: 4171
-  security_groups:
-    - "{{coreos_internal_elb_security_group}}"
+load_balancers:
+  - name: nsqadmin
+    health_check:
+      ping_protocol: http
+      ping_port: 4171
+      ping_path: "/"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: http
+        load_balancer_port: 80
+        instance_port: 4171
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
+
+dns_records:
+  - record: nsqadmin
+    load_balancer_name: nsqadmin
+    internal: yes
+
+tasks:
+  - family: nsqadmin
+    containerDefinitions:
+      - name: nsqadmin
+        image: nsqio/nsq:v0.3.5
+        memory: 32
+        portMappings:
+          - hostPort: 4171
+            containerPort: 4171
+            protocol: tcp
+        command:
+          - "/nsqadmin"
+          - "-lookupd-http-address=nsqlookupd-1.{{internal_domain}}:4161"
+          - "-lookupd-http-address=nsqlookupd-2.{{internal_domain}}:4161"
+
+services:
+  - serviceName: nsqadmin
+    taskDefinition: nsqadmin
+    loadBalancers:
+      - loadBalancerName: nsqadmin
+        containerName: nsqadmin
+        containerPort: 4171
+    desiredCount: 2
+    role: "{{ecs_role}}"

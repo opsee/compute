@@ -1,17 +1,22 @@
-load_balancer:
-  name: etcd
-  health_check:
-    ping_protocol: http
-    ping_port: 2479
-    ping_path: "/health"
-    response_timeout: 2
-    interval: 5
-    unhealthy_threshold: 2
-    healthy_threshold: 5
-  listeners:
-    - protocol: https
-      load_balancer_port: 443
-      instance_port: 2479
-      ssl_certificate_id: "{{internal_certificate}}"
-  security_groups:
-    - "{{coreos_internal_elb_security_group}}"
+load_balancers:
+  - name: etcd
+    health_check:
+      ping_protocol: http
+      ping_port: 2479
+      ping_path: "/health"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: http
+        load_balancer_port: 2479
+        instance_port: 2479
+        ssl_certificate_id: "{{internal_certificate}}"
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
+
+dns_records:
+  - record: etcd
+    load_balancer_name: etcd
+    internal: yes

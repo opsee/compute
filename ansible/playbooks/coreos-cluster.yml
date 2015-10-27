@@ -14,3 +14,7 @@
     - role: coreos
       coreos_new_cluster: yes
       tags: coreos-cluster
+    - role: bastion-vpn
+      tags: bastion-vpn
+
+# TODO: figure out route table

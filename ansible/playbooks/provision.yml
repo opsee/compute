@@ -1,0 +1,53 @@
+---
+- hosts: localhost
+  connection: local
+
+  vars:
+    rds_instances: []
+    elb_load_balancers: []
+    route53_zones: ["{{internal_domain}}"]
+    route53_entries: []
+    ecs_image_tag: "{{lookup('env', 'IMAGE_TAG')}}"
+
+  vars_files:
+    - ../secrets/databases.yml
+    - ../environments/{{environment}}.yml
+    - ../secrets/app-env.yml
+
+  pre_tasks:
+    - include: opsee-services-loader.yml
+      tags:
+        - rds
+        - elb
+        - route53
+
+    - name: set rds instances
+      set_fact:
+        rds_instances: "{{rds_instances + item.value.db_instances}}"
+      with_dict: opsee_services
+      when: item.value.db_instances is defined
+      tags: [rds]
+
+    - name: set load balancers
+      set_fact:
+        elb_load_balancers: "{{elb_load_balancers + item.value.load_balancers}}"
+      with_dict: opsee_services
+      when: item.value.load_balancers is defined
+      tags: [rds]
+
+    - name: set dns entries
+      set_fact:
+        route53_entries: "{{route53_entries + item.value.dns_records}}"
+      with_dict: opsee_services
+      when: item.value.dns_records is defined
+      tags: [route53]
+
+  roles:
+    - role: rds
+      tags: [rds]
+    - role: elb
+      tags: [elb]
+    - role: route53
+      tags: [route53]
+    - role: app-env
+      tags: [app-env]
