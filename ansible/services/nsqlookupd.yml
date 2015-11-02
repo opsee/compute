@@ -1,0 +1,89 @@
+load_balancers:
+  - name: nsqlookupd-1
+    health_check:
+      ping_protocol: http
+      ping_port: 4161
+      ping_path: "/ping"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: tcp
+        load_balancer_port: 4160
+        instance_port: 4160
+      - protocol: http
+        load_balancer_port: 4161
+        instance_port: 4161
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
+  - name: nsqlookupd-2
+    health_check:
+      ping_protocol: http
+      ping_port: 4161
+      ping_path: "/ping"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: tcp
+        load_balancer_port: 4160
+        instance_port: 4160
+      - protocol: http
+        load_balancer_port: 4161
+        instance_port: 4161
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
+
+dns_records:
+  - record: nsqlookupd-1
+    load_balancer_name: nsqlookupd-1
+    internal: yes
+  - record: nsqlookupd-2
+    load_balancer_name: nsqlookupd-2
+    internal: yes
+  - record: nsqlookupd
+    load_balancer_name: nsqlookupd-1
+    internal: yes
+    identifier: nsqlookupd-1
+    weight: 50
+  - record: nsqlookupd
+    load_balancer_name: nsqlookupd-2
+    internal: yes
+    identifier: nsqlookupd-2
+    weight: 50
+
+tasks:
+  - family: nsqlookupd
+    containerDefinitions:
+      - name: nsqlookupd
+        image: nsqio/nsq:v0.3.5
+        memory: 32
+        portMappings:
+          - hostPort: 4160
+            containerPort: 4160
+            protocol: tcp
+          - hostPort: 4161
+            containerPort: 4161
+            protocol: tcp
+        command:
+          - "/nsqlookupd"
+
+services:
+  - serviceName: nsqlookupd-1
+    taskDefinition: nsqlookupd
+    loadBalancers:
+      - loadBalancerName: nsqlookupd-1
+        containerName: nsqlookupd
+        containerPort: 4160
+    desiredCount: 1
+    role: "{{ecs_role}}"
+  - serviceName: nsqlookupd-2
+    taskDefinition: nsqlookupd
+    loadBalancers:
+      - loadBalancerName: nsqlookupd-2
+        containerName: nsqlookupd
+        containerPort: 4160
+    desiredCount: 1
+    role: "{{ecs_role}}"

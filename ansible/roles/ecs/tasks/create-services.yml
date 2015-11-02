@@ -1,1 +1,11 @@
 ---
+- name: create ecs services
+  ecs_service:
+    region: "{{region}}"
+    cluster: "{{environment_region}}"
+    name: "{{item.serviceName}}"
+    definition: "{{item.taskDefinition}}"
+    load_balancers: "{{item.loadBalancers}}"
+    desired_count: "{{item.desiredCount}}"
+    role: "{{item.role}}"
+  with_items: ecs_services

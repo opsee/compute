@@ -1,0 +1,54 @@
+#cloud-config
+coreos:
+  units:
+    - name: etcd.service
+      command: stop
+    - name: etcd2.service
+      command: stop
+    - name: docker.service
+      command: start
+      user: core
+    - name: bastion-vpn.service
+      command: start
+      content: |
+        [Unit]
+        Description=bastion vpn container
+        After=docker.service
+        Requires=docker.service
+        [Service]
+        User=core
+        Restart=always
+        ExecStartPre=-/usr/bin/docker stop -t 5 bastion-vpn
+        ExecStartPre=-/usr/bin/docker rm bastion-vpn
+        ExecStartPre=/usr/bin/docker pull quay.io/opsee/gozer:latest
+        ExecStart=/usr/bin/docker run -e AUTH_URL={{bastion_vpn_auth_url}} --net=host --cap-add=NET_ADMIN --device=/dev/net/tun --name bastion-vpn -p 1194:1194 quay.io/opsee/gozer:latest server {{bastion_vpn_client_subnet | ipaddr('network')}}
+        ExecStop=/usr/bin/docker stop -t 5 bastion-vpn
+    - name: bastion-router.service
+      command: start
+      content: |
+        [Unit]
+        Description=bastion router container
+        After=docker.service
+        Requires=docker.service
+        [Service]
+        User=core
+        Restart=always
+        ExecStartPre=-/usr/bin/docker stop -t 5 bastion-router
+        ExecStartPre=-/usr/bin/docker rm bastion-router
+        ExecStartPre=/usr/bin/docker pull quay.io/opsee/gozer:latest
+        ExecStart=/usr/bin/docker run --name bastion-router quay.io/opsee/zuul:latest router --subnet {{bastion_vpn_client_subnet}} --table {{route_table_id}}
+        ExecStop=/usr/bin/docker stop -t 5 bastion-router
+  update:
+    group: stable
+    reboot-strategy: etcd-lock
+write_files:
+  - path: /home/core/.dockercfg
+    permissions: 0600
+    owner: core
+    content: |
+      {
+          "quay.io": {
+                  "auth": "b3BzZWUrb3BzZWVjaTpGNFE2RlJWMVpaT1FWV0hHVDNIU0gzSVlKOEFJOUYxUk5RWVVLTFFKUVpKVUU3MTFWSjZSSUJBVlg4VkJLV1lI",
+                  "email": "ci@opsee.co"
+          }
+      }

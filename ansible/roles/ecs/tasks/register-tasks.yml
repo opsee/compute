@@ -2,7 +2,7 @@
 - name: register task definitions
   ecs_task_definition:
     region: "{{region}}"
-    family: "{{item.value.family}}"
-    definitions: "{{item.value.containerDefinitions}}"
-    volumes: "{{item.value.volumes|default([])}}"
+    family: "{{item.family}}"
+    definitions: "{{item.containerDefinitions}}"
+    volumes: "{{item.volumes|default([])}}"
   with_items: ecs_tasks

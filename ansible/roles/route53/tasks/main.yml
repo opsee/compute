@@ -1,0 +1,6 @@
+---
+- include: create-zones.yml
+  when: route53_zones is defined
+
+- include: create-entries.yml
+  when: route53_entries is defined

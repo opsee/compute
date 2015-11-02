@@ -1,18 +1,61 @@
-load_balancer:
-  name: nsqd
-  health_check:
-    ping_protocol: tcp
-    ping_port: 4150
-    response_timeout: 2
-    interval: 5
-    unhealthy_threshold: 2
-    healthy_threshold: 5
-  listeners:
-    - protocol: tcp
-      load_balancer_port: 4150
-      instance_port: 4150
-    - protocol: http
-      load_balancer_port: 4151
-      instance_port: 4151
-  security_groups:
-    - "{{coreos_internal_elb_security_group}}"
+load_balancers:
+  - name: nsqd
+    health_check:
+      ping_protocol: http
+      ping_port: 4151
+      ping_path: "/ping"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: tcp
+        load_balancer_port: 4150
+        instance_port: 4150
+      - protocol: http
+        load_balancer_port: 4151
+        instance_port: 4151
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
+
+dns_records:
+  - record: nsqd
+    load_balancer_name: nsqd
+    internal: yes
+
+tasks:
+  - family: nsqd
+    volumes:
+      - name: environment
+        host:
+          sourcePath: "/opt/etc"
+    containerDefinitions:
+      - name: nsqd
+        image: quay.io/opsee/nsqd:latest
+        memory: 32
+        portMappings:
+          - hostPort: 4150
+            containerPort: 4150
+            protocol: tcp
+          - hostPort: 4151
+            containerPort: 4151
+            protocol: tcp
+        mountPoints:
+          - sourceVolume: environment
+            containerPath: /etc/nsqd
+            readOnly: true
+        entryPoint:
+          - "/entrypoint"
+          - "-lookupd-tcp-address=nsqlookupd-1.{{internal_domain}}:4160"
+          - "-lookupd-tcp-address=nsqlookupd-2.{{internal_domain}}:4160"
+          - "-verbose"
+
+services:
+  - serviceName: nsqd
+    taskDefinition: nsqd
+    loadBalancers:
+      - loadBalancerName: nsqd
+        containerName: nsqd
+        containerPort: 4150
+    desiredCount: 2
+    role: "{{ecs_role}}"

@@ -1,7 +1,7 @@
 ---
 - name: rds security group
   ec2_group:
-    description: "database security group for {{region}}"
+    description: "database security group for {{environment_region}}"
     name: "{{rds_security_group}}"
     region: "{{region}}"
     vpc_id: "{{vpc_id}}"
@@ -15,8 +15,8 @@
 
 - name: rds subnet group
   rds_subnet_group:
-    description: rds subnet group for {{region}}
-    name: rds {{region}}
+    description: rds subnet group for {{environment_region}}
+    name: rds {{environment_region}}
     region: "{{region}}"
     state: present
     subnets: "{{availability_zones|dict_values|map(attribute='subnet_id')|list}}"
@@ -24,16 +24,18 @@
 - name: rds instances
   rds:
     command: create
-    db_engine: "{{item.value.db_engine}}"
-    db_name: "{{item.value.db_name}}"
-    instance_name: "{{item.value.db_name}}"
-    instance_type: "{{item.value.instance_type}}"
-    multi_zone: "{{item.value.multi_zone}}"
-    password: "{{database_passwords[item.value.db_name]}}"
+    db_engine: "{{item.db_engine}}"
+    db_name: "{{item.db_name}}"
+    instance_name: "{{item.db_name}}"
+    instance_type: "{{item.instance_type}}"
+    multi_zone: "{{item.multi_zone}}"
+    password: "{{database_passwords[environment][item.db_name]}}"
     publicly_accessible: no
     region: "{{region}}"
     vpc_security_groups: "{{rds_security_group_result.group_id}}"
-    size: "{{item.value.size}}"
-    username: "{{item.value.username}}"
-    subnet: rds {{region}}
-  with_dict: rds_instances
+    size: "{{item.size}}"
+    username: "{{item.username}}"
+    subnet: rds {{environment_region}}
+    tags:
+      Environment: "{{environment}}"
+  with_items: rds_instances

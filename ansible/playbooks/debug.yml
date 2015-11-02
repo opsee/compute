@@ -1,0 +1,6 @@
+---
+- hosts: localhost
+  connection: local
+  tasks:
+    - debug:
+        var: "{{'10.0.3.0/24' | ipaddr('network')}}"

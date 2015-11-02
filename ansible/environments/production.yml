@@ -1,7 +1,9 @@
 # region info
 region: us-west-2
+environment_region: "{{environment}}-{{region}}"
 vpc_id: vpc-b5f3a4d0
 vpc_subnet: "172.30.0.0/16"
+vpc_resolver: "172.30.0.2"
 internet_gateway_id: igw-8e76e7eb
 route_table_id: rtb-f0085195
 availability_zones:
@@ -21,31 +23,48 @@ server_certificate_ids:
   opsy_co: arn:aws:iam::933693344490:server-certificate/OpsyCoWildcard
   opsee_co: arn:aws:iam::933693344490:server-certificate/OpseeCoWildcard
   opsee_com: arn:aws:iam::933693344490:server-certificate/cloudfront/OpseeComWildcard
-internal_certificate: "{{server_certificate_ids.opsy_co}}"
+  in_opsee_com: arn:aws:iam::933693344490:server-certificate/InOpseeComWildcard
+internal_certificate: "{{server_certificate_ids.in_opsee_com}}"
 public_certificate: "{{server_certificate_ids.opsee_com}}"
+internal_domain: "in.opsee.com"
+public_domain: "opsee.com"
+# dns_addresses: "52.32.142.7"
+dns_addresses: "169.254.169.253" # temporary
 
 # strongswan vpn
-strongswan_gateway_name: "{{region}}.vpn.opsee.com"
+strongswan_gateway_name: "{{environment_region}}.vpn.opsee.com"
 strongswan_gateway_ip: "{{availability_zones['us-west-2a'].cidr | ipsubnet(24, 0) | ipaddr(-1) | ipaddr('address') }}"
 strongswan_gateway_subnet: "{{vpc_subnet}}"
 strongswan_client_subnet: "10.100.255.0/24"
-strongswan_security_group: "strongSwan {{region}}"
+strongswan_security_group: "strongSwan {{environment_region}}"
 strongswan_instance_type: t2.micro
-strongswan_keypair: "strongSwan keypair {{region}}"
+strongswan_keypair: "strongSwan keypair {{environment_region}}"
 strongswan_public_ip: "52.26.106.239"
 strongswan_instance_subnet_id: "{{availability_zones['us-west-2a'].subnet_id}}"
 strongswan_instance_profile: CoreOS_Cluster_Role
 
+# bastion vpn (gozer)
+bastion_vpn_keypair: "bastion vpn keypair {{environment_region}}"
+bastion_vpn_security_group: "bastion-vpn {{environment_region}}"
+bastion_vpn_instance_subnet_id: "{{availability_zones['us-west-2a'].subnet_id}}"
+bastion_vpn_instance_profile: CoreOS_Cluster_Role
+bastion_vpn_instance_type: t2.micro
+bastion_vpn_gateway_ip: "{{availability_zones['us-west-2a'].cidr | ipsubnet(24, 0) | ipaddr(-2) | ipaddr('address') }}"
+bastion_vpn_public_ip: "52.32.119.223"
+bastion_vpn_client_subnet: "10.0.3.0/24"
+bastion_vpn_host: "bastion.{{public_domain}}"
+bastion_vpn_auth_url: https://vape.{{internal_domain}}/bastions/authenticate
+
 # ecs cluster
-ecs_cluster_name: "{{environment}}"
+ecs_cluster_name: "{{environment_region}}"
 
 # coreos cluster
-coreos_security_group: "CoreOS cluster {{region}}"
+coreos_security_group: "CoreOS cluster {{environment_region}}"
 coreos_vpn_security_group: "{{strongswan_security_group}}"
-coreos_ssh_elb_security_group: "CoreOS cluster ssh ELB {{region}}"
-coreos_internal_elb_security_group: "CoreOS cluster internal ELB {{region}}"
-coreos_public_elb_security_group: "CoreOS cluster public ELB {{region}}"
-coreos_keypair: "CoreOS cluster keypair {{region}}"
+coreos_ssh_elb_security_group: "CoreOS cluster ssh ELB {{environment_region}}"
+coreos_internal_elb_security_group: "CoreOS cluster internal ELB {{environment_region}}"
+coreos_public_elb_security_group: "CoreOS cluster public ELB {{environment_region}}"
+coreos_keypair: "CoreOS cluster keypair {{environment_region}}"
 coreos_instance_profile: CoreOS_Cluster_Role
 coreos_ami: ami-ed8b90dd
 coreos_master_instance_type: t2.micro
@@ -59,10 +78,14 @@ coreos_master_deployment:
     private_ip: "{{availability_zones['us-west-2c'].cidr | ipsubnet(24, 1) | ipaddr(1) | ipaddr('address')}}"
 coreos_worker_deployment:
   - availability_zone: "{{availability_zones['us-west-2a']}}"
+    count: 2
   - availability_zone: "{{availability_zones['us-west-2b']}}"
+    count: 1
+  - availability_zone: "{{availability_zones['us-west-2c']}}"
+    count: 1
 
 # databases
-rds_security_group: "RDS {{region}}"
+rds_security_group: "RDS {{environment_region}}"
 
 # ecs
 ecs_role: arn:aws:iam::933693344490:role/ecsServiceRole

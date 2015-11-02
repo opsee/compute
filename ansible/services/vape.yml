@@ -1,0 +1,102 @@
+load_balancers:
+  - name: vape-private
+    health_check:
+      ping_protocol: http
+      ping_port: 9091
+      ping_path: "/health"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: https
+        load_balancer_port: 443
+        instance_protocol: http
+        instance_port: 9091
+        ssl_certificate_id: "{{internal_certificate}}"
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
+
+  - name: vape-public
+    health_check:
+      ping_protocol: http
+      ping_port: 8081
+      ping_path: "/health"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: https
+        load_balancer_port: 443
+        instance_protocol: http
+        instance_port: 8081
+        ssl_certificate_id: "{{public_certificate}}"
+    security_groups:
+      - "{{coreos_public_elb_security_group}}"
+    scheme: internet-facing
+
+db_instances:
+  - db_engine: postgres
+    db_name: vape
+    instance_type: db.m3.medium
+    multi_zone: no
+    size: 100
+    username: vape
+
+dns_records:
+  - record: vape
+    load_balancer_name: vape-private
+    internal: yes
+  - record: auth
+    load_balancer_name: vape-public
+    public: yes
+
+# working around the fact that only 1 elb is supported per service
+tasks:
+  - family: vape-private
+    containerDefinitions:
+      - name: vape
+        image: quay.io/opsee/vape:{{ecs_image_tag}}
+        memory: 256
+        environment:
+          - name: APPENV
+            value: vapenv-{{environment}}-{{region}}
+        portMappings:
+          - hostPort: 9091
+            containerPort: 9091
+            protocol: tcp
+        command:
+          - "/run.sh"
+  - family: vape-public
+    containerDefinitions:
+      - name: vape
+        image: quay.io/opsee/vape:{{ecs_image_tag}}
+        memory: 256
+        environment:
+          - name: APPENV
+            value: vapenv-{{environment}}-{{region}}
+        portMappings:
+          - hostPort: 8081
+            containerPort: 8081
+            protocol: tcp
+        command:
+          - "/run.sh"
+
+services:
+  - serviceName: vape-private
+    taskDefinition: vape-private
+    loadBalancers:
+      - loadBalancerName: vape-private
+        containerName: vape
+        containerPort: 9091
+    desiredCount: 2
+    role: "{{ecs_role}}"
+  - serviceName: vape-public
+    taskDefinition: vape-public
+    loadBalancers:
+      - loadBalancerName: vape-public
+        containerName: vape
+        containerPort: 8081
+    desiredCount: 2
+    role: "{{ecs_role}}"

@@ -1,0 +1,52 @@
+---
+- name: get load balancer facts
+  elb_facts:
+    region: "{{region}}"
+  register: load_balancer_facts
+
+- name: create alias dns records by load balancer name
+  route53:
+    alias: yes
+    alias_hosted_zone_id: "{{(load_balancer_facts.elbs|selectattr('LoadBalancerName', 'equalto', item.load_balancer_name)|first).CanonicalHostedZoneNameID}}"
+    command: create
+    overwrite: no
+    private_zone: no
+    record: "{{item.record}}.{{internal_domain}}"
+    type: A
+    value: "{{(load_balancer_facts.elbs|selectattr('LoadBalancerName', 'equalto', item.load_balancer_name)|first).DNSName}}"
+    zone: "{{internal_domain}}"
+  with_items: route53_entries
+  when: item.load_balancer_name is defined and item.internal is defined and item.internal and item.identifier is not defined
+  ignore_errors: yes # burn in hell, module author
+
+- name: create internal alias dns records by load balancer name
+  route53:
+    alias: yes
+    alias_hosted_zone_id: "{{(load_balancer_facts.elbs|selectattr('LoadBalancerName', 'equalto', item.load_balancer_name)|first).CanonicalHostedZoneNameID}}"
+    command: create
+    overwrite: no
+    private_zone: no
+    record: "{{item.record}}.{{internal_domain}}"
+    type: A
+    value: "{{(load_balancer_facts.elbs|selectattr('LoadBalancerName', 'equalto', item.load_balancer_name)|first).DNSName}}"
+    zone: "{{internal_domain}}"
+    identifier: "{{item.identifier}}"
+    weight: "{{item.weight}}"
+  with_items: route53_entries
+  when: item.load_balancer_name is defined and item.internal is defined and item.internal and item.identifier is defined and item.weight is defined
+  ignore_errors: yes # burn in hell twice, module author
+
+- name: create public alias dns records by load balancer name
+  route53:
+    alias: yes
+    alias_hosted_zone_id: "{{(load_balancer_facts.elbs|selectattr('LoadBalancerName', 'equalto', item.load_balancer_name)|first).CanonicalHostedZoneNameID}}"
+    command: create
+    overwrite: no
+    private_zone: no
+    record: "{{item.record}}.{{public_domain}}"
+    type: A
+    value: "{{(load_balancer_facts.elbs|selectattr('LoadBalancerName', 'equalto', item.load_balancer_name)|first).DNSName}}"
+    zone: "{{public_domain}}"
+  with_items: route53_entries
+  when: item.load_balancer_name is defined and item.public is defined and item.public
+  ignore_errors: yes # burn in hell 3 times, module author

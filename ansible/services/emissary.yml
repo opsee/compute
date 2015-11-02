@@ -1,18 +1,45 @@
-load_balancer:
-  name: emissary
-  health_check:
-    ping_protocol: http
-    ping_port: 80
-    ping_path: "/index.html"
-    response_timeout: 2
-    interval: 5
-    unhealthy_threshold: 2
-    healthy_threshold: 5
-  listeners:
-    - protocol: https
-      load_balancer_port: 443
-      instance_port: 80
-      ssl_certificate_id: "{{public_certificate}}"
-  security_groups:
-    - "{{coreos_public_elb_security_group}}"
-  scheme: internet-facing
+load_balancers:
+  - name: emissary
+    health_check:
+      ping_protocol: http
+      ping_port: 80
+      ping_path: "/index.html"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: https
+        load_balancer_port: 443
+        instance_protocol: http
+        instance_port: 80
+        ssl_certificate_id: "{{public_certificate}}"
+    security_groups:
+      - "{{coreos_public_elb_security_group}}"
+    scheme: internet-facing
+
+dns_records:
+  - record: app2-origin
+    load_balancer_name: emissary
+    public: yes
+
+tasks:
+  - family: emissary
+    containerDefinitions:
+      - name: emissary
+        image: quay.io/opsee/emissary:{{ecs_image_tag}}
+        memory: 32
+        portMappings:
+          - hostPort: 80
+            containerPort: 80
+            protocol: tcp
+
+services:
+  - serviceName: emissary
+    taskDefinition: emissary
+    loadBalancers:
+      - loadBalancerName: emissary
+        containerName: emissary
+        containerPort: 80
+    desiredCount: 2
+    role: "{{ecs_role}}"

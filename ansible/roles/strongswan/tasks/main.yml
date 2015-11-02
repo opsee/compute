@@ -14,7 +14,7 @@
 
 - name: strongswan security group
   ec2_group:
-    description: "strongswan security group for {{region}}"
+    description: "strongswan security group for {{environment_region}}"
     name: "{{strongswan_security_group}}"
     region: "{{region}}"
     state: present
@@ -37,9 +37,10 @@
     source_dest_check: no
     instance_profile_name: "{{strongswan_instance_profile}}"
     instance_tags:
-      Name: "StrongSwan gateway {{region}}"
+      Name: "StrongSwan gateway {{environment_region}}"
+      Environment: "{{environment}}"
     count_tag:
-      Name: "StrongSwan gateway {{region}}"
+      Name: "StrongSwan gateway {{environment_region}}"
     exact_count: 1
     group: "{{strongswan_security_group}}"
     image: "{{coreos_ami}}"
@@ -47,6 +48,7 @@
     key_name: "{{strongswan_keypair}}"
     region: "{{region}}"
     private_ip: "{{strongswan_gateway_ip}}"
+    wait: yes
   register: node_result
 
 - debug:
@@ -58,17 +60,4 @@
     device_id: "{{node_result.tagged_instances[0].id}}"
     in_vpc: yes
     region: "{{region}}"
-    state: present
-
-- name: route traffic to vpn
-  ec2_vpc_route_table:
-    region: "{{region}}"
-    route_table_id: "{{route_table_id}}"
-    vpc_id: "{{vpc_id}}"
-    lookup: id
-    routes:
-      - dest: "0.0.0.0/0"
-        gateway_id: "{{internet_gateway_id}}"
-      - dest: "{{strongswan_client_subnet}}"
-        instance_id: "{{node_result.tagged_instances[0].id}}"
     state: present
