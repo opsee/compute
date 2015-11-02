@@ -28,7 +28,7 @@ tasks:
     containerDefinitions:
       - name: emissary
         image: quay.io/opsee/emissary:{{ecs_image_tag}}
-        memory: 32
+        memory: 256
         portMappings:
           - hostPort: 80
             containerPort: 80

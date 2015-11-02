@@ -32,7 +32,7 @@ tasks:
     containerDefinitions:
       - name: nsqd
         image: quay.io/opsee/nsqd:latest
-        memory: 32
+        memory: 256
         portMappings:
           - hostPort: 4150
             containerPort: 4150
