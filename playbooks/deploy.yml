@@ -33,3 +33,14 @@
     - role: ecs
       ecs_register_tasks: yes
       ecs_create_services: yes
+
+  tasks:
+    - name: notify
+      slack:
+        token: "T03B4DP5B/B0DMRBAHK/FqfU5SVMzINL9GCvNBhRQXoz"
+        color: good
+        icon_url: "https://s3-us-west-1.amazonaws.com/opsee-public-images/slack-avi-48-green.png"
+        msg: "I just deployed {{item.key}} -- cool cool."
+        username: DeployBot
+      with_dict: opsee_services
+      tags: notify
