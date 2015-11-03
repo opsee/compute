@@ -59,7 +59,7 @@ tasks:
     containerDefinitions:
       - name: nsqlookupd
         image: nsqio/nsq:v0.3.5
-        memory: 32
+        memory: 256
         portMappings:
           - hostPort: 4160
             containerPort: 4160

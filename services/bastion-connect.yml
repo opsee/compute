@@ -3,7 +3,7 @@ tasks:
     containerDefinitions:
       - name: bastion-connect
         image: quay.io/opsee/zuul:{{ecs_image_tag}}
-        memory: 32
+        memory: 256
         command:
           - connect
           - "--etcd-address=etcd.{{internal_domain}}:2479"

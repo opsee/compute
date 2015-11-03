@@ -1,0 +1,22 @@
+machine:
+  services:
+    - docker
+  environment:
+    ci: "true"
+    DOCKER_REPO: quay.io/opsee
+    DOCKER_IMAGE: $DOCKER_REPO/$CIRCLE_PROJECT_REPONAME
+dependencies:
+  override:
+    - docker info
+    - docker login -e $DOCKER_EMAIL -u $DOCKER_USERNAME -p $DOCKER_PASSWORD quay.io
+test:
+  override:
+    - docker build -t $DOCKER_REPO/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1 .
+deployment:
+  production:
+    branch: master
+    owner: opsee
+    commands:
+      - docker tag -f $DOCKER_IMAGE:$CIRCLE_SHA1 $DOCKER_IMAGE:latest
+      - docker push $DOCKER_IMAGE:$CIRCLE_SHA1
+      - docker push $DOCKER_IMAGE:latest
