@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# ./compute deploy production bartnet latest
+
+PLAY=$1
+ENVIRONMENT=$2
+SERVICES=$3
+IMAGE_TAG=$4
+
+function usage {
+  echo "usage: $0 [playbook] [environment] [services] [image-tag]"
+}
+
+if [ "${PLAY}x" = "x" ]; then
+  usage
+  exit 1
+fi
+
+if [ "${ENVIRONMENT}x" = "x" ]; then
+  usage
+  exit 1
+fi
+
+if [ "${SERVICES}x" = "x" ]; then
+  usage
+  exit 1
+fi
+
+ARGS="-e environment=$ENVIRONMENT -f 1 -vvvv"
+
+if [ "${PLAY}" != "deploy" ]; then
+  ARGS="$ARGS --ask-vault-pass"
+fi
+
+docker run --rm \
+-t -i \
+-e IMAGE_TAG=${IMAGE_TAG} \
+-e SERVICES=${SERVICES} \
+-e AWS_DEFAULT_REGION \
+-e AWS_ACCESS_KEY_ID \
+-e AWS_SECRET_ACCESS_KEY \
+quay.io/opsee/compute:latest "playbooks/${PLAY}.yml" $ARGS
