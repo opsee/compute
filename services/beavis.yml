@@ -35,7 +35,7 @@ tasks:
     containerDefinitions:
       - name: beavis
         image: quay.io/opsee/beavis:{{ecs_image_tag}}
-        memory: 1024
+        memory: 2048
         environment:
           - name: APPENV
             value: beavisenv-{{environment}}-{{region}}

@@ -35,7 +35,8 @@ tasks:
     containerDefinitions:
       - name: bartnet
         image: quay.io/opsee/bartnet:{{ecs_image_tag}}
-        memory: 1024
+        memory: 2048
+        cpu: 384
         environment:
           - name: APPENV
             value: bartnetenv-{{environment}}-{{region}}

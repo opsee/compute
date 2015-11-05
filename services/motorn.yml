@@ -29,6 +29,7 @@ tasks:
       - name: motorn
         image: quay.io/opsee/motorn:{{ecs_image_tag}}
         memory: 256
+        cpu: 124
         environment:
           - name: APPENV
             value: motornenv-{{environment}}-{{region}}
