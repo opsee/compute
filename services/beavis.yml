@@ -53,5 +53,5 @@ services:
       - loadBalancerName: beavis
         containerName: beavis
         containerPort: 2020
-    desiredCount: 2
+    desiredCount: 1
     role: "{{ecs_role}}"
