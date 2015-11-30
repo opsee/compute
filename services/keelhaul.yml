@@ -1,0 +1,57 @@
+load_balancers:
+  - name: keelhaul
+    health_check:
+      ping_protocol: http
+      ping_port: 9094
+      ping_path: "/health"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: https
+        load_balancer_port: 443
+        instance_protocol: http
+        instance_port: 9094
+        ssl_certificate_id: "{{internal_certificate}}"
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
+
+db_instances:
+  - db_engine: postgres
+    db_name: keelhaul
+    instance_type: db.m3.medium
+    multi_zone: no
+    size: 100
+    username: keelhaul
+
+dns_records:
+  - record: keelhaul
+    load_balancer_name: keelhaul
+    internal: yes
+
+tasks:
+  - family: keelhaul
+    containerDefinitions:
+      - name: keelhaul
+        image: quay.io/opsee/keelhaul:{{ecs_image_tag}}
+        memory: 256
+        environment:
+          - name: APPENV
+            value: keelhaulenv-{{environment}}-{{region}}
+        portMappings:
+          - hostPort: 9094
+            containerPort: 9094
+            protocol: tcp
+        command:
+          - "/run.sh"
+
+services:
+  - serviceName: keelhaul
+    taskDefinition: keelhaul
+    loadBalancers:
+      - loadBalancerName: keelhaul
+        containerName: keelhaul
+        containerPort: 9094
+    desiredCount: 2
+    role: "{{ecs_role}}"
