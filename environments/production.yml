@@ -53,7 +53,7 @@ bastion_vpn_gateway_ip: "{{availability_zones['us-west-2a'].cidr | ipsubnet(24, 
 bastion_vpn_public_ip: "52.32.119.223"
 bastion_vpn_client_subnet: "10.0.3.0/24"
 bastion_vpn_host: "bastion.{{public_domain}}"
-bastion_vpn_auth_url: https://vape.{{internal_domain}}/bastions/authenticate
+bastion_vpn_auth_url: https://keelhaul.{{internal_domain}}/bastions/authenticate
 
 # ecs cluster
 ecs_cluster_name: "{{environment_region}}"
