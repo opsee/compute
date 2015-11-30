@@ -11,6 +11,10 @@
         from_port: 5432
         to_port: 5432
         cidr_ip: "{{vpc_subnet}}"
+      - proto: tcp
+        from_port: 5432
+        to_port: 5432
+        group_name: "{{coreos_vpn_security_group}}"
   register: rds_security_group_result
 
 - name: rds subnet group
