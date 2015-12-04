@@ -30,3 +30,40 @@ Playbook: coreos-production
 ---------------------------
 
 This configures a 3-node etcd quorum, 2 ecs worker nodes, and a strongswan vpn instance into us-west-2.
+
+Vault
+-----
+
+The vault passphrase can be decrypted using keybase.
+
+```
+λ brew install keybase
+
+...
+
+λ keybase login
+
+λ keybase decrypt vault_passphrase/<username>.gpg | pbcopy
+
+You need a passphrase to unlock the secret key for
+user: "keybase.io/keybase_username <keybase_username@keybase.io>"
+4096-bit RSA key, ID 5C6CDEF4362A772F, created 2015-11-03
+         (subkey on main key ID D25BB76C14050BD0)
+
+Enter passphrase: <enter passphrase, hit enter>
+
+<plaintext>
+
+```
+
+Now that you have the secret in your paste buffer---which is totally super
+secure---you can edit the config stored in the ansible vault.
+
+```
+
+λ ansible-vault edit secrets/app-env.yml
+Vault password: <cmd-v>
+
+```
+
+This will bring up $EDITOR and allow you to make changes to the vault.
