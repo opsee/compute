@@ -43,7 +43,7 @@ The vault passphrase can be decrypted using keybase.
 
 λ keybase login
 
-λ keybase decrypt vault_passphrase/<username>.gpg | pbcopy
+λ keybase decrypt vault_passphrase/<username>.gpg > .vault_password
 
 You need a passphrase to unlock the secret key for
 user: "keybase.io/keybase_username <keybase_username@keybase.io>"
@@ -52,17 +52,7 @@ user: "keybase.io/keybase_username <keybase_username@keybase.io>"
 
 Enter passphrase: <enter passphrase, hit enter>
 
-<plaintext>
-
-```
-
-Now that you have the secret in your paste buffer---which is totally super
-secure---you can edit the config stored in the ansible vault.
-
-```
-
 λ ansible-vault edit secrets/app-env.yml
-Vault password: <cmd-v>
 
 ```
 
