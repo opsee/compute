@@ -28,10 +28,6 @@ fi
 
 ARGS="-e environment=$ENVIRONMENT -f 1 -vvvv"
 
-if [ "${PLAY}" != "deploy" ]; then
-  ARGS="$ARGS --ask-vault-pass"
-fi
-
 docker run --rm \
 -t -i \
 -e IMAGE_TAG=${IMAGE_TAG} \
