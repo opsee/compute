@@ -28,4 +28,4 @@ fi
 
 ARGS="-e environment=$ENVIRONMENT -f 1 -vvvv"
 
-ansible-playbook "playbooks/${PLAY}.yml" $ARGS
+SERVICES="$SERVICES" IMAGE_TAG="$IMAGE_TAG" ansible-playbook "playbooks/${PLAY}.yml" $ARGS
