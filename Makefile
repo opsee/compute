@@ -1,10 +1,26 @@
-build:
-	docker build -t quay.io/opsee/compute:latest .
+# vim: set ts=8 sts=8 sw=8 noexpandtab:
 
-push:
-	docker push quay.io/opsee/compute:latest
+DIRS := environments library playbooks plugins roles secrets services
+USER ?= $(shell whoami)
 
-check: build
-	./run coreos-production --check
+dependencies: $(DIRS) .env .vault_password
 
-.PHONY: build check push
+.env:
+	@./setup.bash
+	@echo
+	@echo "Execute: source .env/bin/activate"
+	@echo
+
+.vault_password: vault_password/$(USER).gpg
+	keybase pgp decrypt -i vault_password/$(USER).gpg > .vault_password
+
+vault_password/*.gpg:
+
+compute.zip: dependencies $(DIRS)
+	zip -r compute.zip $(DIRS)
+	cd .env && zip -r ../compute.zip lib/python2.7/site-packages
+
+clean:
+	rm -rf .env
+
+.PHONY: clean

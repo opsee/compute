@@ -28,11 +28,4 @@ fi
 
 ARGS="-e environment=$ENVIRONMENT -f 1 -vvvv"
 
-docker run --rm \
--t -i \
--e IMAGE_TAG=${IMAGE_TAG} \
--e SERVICES=${SERVICES} \
--e AWS_DEFAULT_REGION \
--e AWS_ACCESS_KEY_ID \
--e AWS_SECRET_ACCESS_KEY \
-quay.io/opsee/compute:latest "playbooks/${PLAY}.yml" $ARGS
+ansible-playbook "playbooks/${PLAY}.yml" $ARGS
