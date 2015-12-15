@@ -107,6 +107,7 @@ coreos:
         Requires=network-online.target docker.service
         After=network-online.target docker.service
         [Service]
+        Restart=always
         ExecStartPre=-/usr/bin/docker kill ecs-agent
         ExecStartPre=-/usr/bin/docker rm ecs-agent
         ExecStartPre=/usr/bin/docker pull amazon/amazon-ecs-agent
