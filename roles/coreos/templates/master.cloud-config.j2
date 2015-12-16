@@ -144,7 +144,7 @@ coreos:
         ExecStartPre=-/usr/bin/docker kill logspout
         ExecStartPre=-/usr/bin/docker rm logspout
         ExecStartPre=/usr/bin/docker pull gliderlabs/logspout:master
-        ExecStart=/usr/bin/docker run --name logspout -v /var/run/docker.sock:/tmp/docker.sock gliderlabs/logspout:master syslog+tls://logs3.papertrailapp.com:51722
+        ExecStart=/usr/bin/docker run --name logspout -e SYSLOG_FORMAT=rfc3164  -v /var/run/docker.sock:/tmp/docker.sock gliderlabs/logspout:master syslog+tls://logs3.papertrailapp.com:51722
         ExecStop=/usr/bin/docker stop logspout
   
   update:
