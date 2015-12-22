@@ -7,7 +7,7 @@ tasks:
         command:
           - connect
           - "--etcd-address=http://etcd.{{internal_domain}}:2479"
-          - "--nsqlookupd-tcp-address=nsqlookupd.{{internal_domain}}:4161"
+          - "--nsqlookupd-tcp-address=nsqlookupd-1.{{internal_domain}}:4161,nsqlookupd-2.{{internal_domain}}:4161"
 
 services:
   - serviceName: bastion-connect
