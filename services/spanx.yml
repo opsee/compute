@@ -1,0 +1,57 @@
+load_balancers:
+  - name: spanx
+    health_check:
+      ping_protocol: http
+      ping_port: 9095
+      ping_path: "/health"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: ssl
+        load_balancer_port: 443
+        instance_protocol: tcp
+        instance_port: 9095
+        ssl_certificate_id: "{{internal_certificate}}"
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
+
+db_instances:
+  - db_engine: postgres
+    db_name: spanx
+    instance_type: db.m3.medium
+    multi_zone: no
+    size: 10
+    username: spanx
+
+dns_records:
+  - record: spanx
+    load_balancer_name: spanx
+    internal: yes
+
+tasks:
+  - family: spanx
+    containerDefinitions:
+      - name: spanx
+        image: quay.io/opsee/spanx:{{ecs_image_tag}}
+        memory: 256
+        environment:
+          - name: APPENV
+            value: spanxenv-{{environment}}-{{region}}
+        portMappings:
+          - hostPort: 9095
+            containerPort: 9095
+            protocol: tcp
+        command:
+          - "/run.sh"
+
+services:
+  - serviceName: spanx
+    taskDefinition: spanx
+    loadBalancers:
+      - loadBalancerName: spanx
+        containerName: spanx
+        containerPort: 9095
+    desiredCount: 2
+    role: "{{ecs_role}}"
