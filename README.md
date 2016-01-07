@@ -50,6 +50,17 @@ make build && ./run coreos-production -t strongswan
 make build && ./run coreos-production -t coreos-cluster -vvv
 ```
 
+Playbook: deploy
+----------------
+
+To deploy your application to an environment run:
+
+`./run deploy <environment> <service name> <revision>`
+
+* environment - e.g. production, staging, etc.
+* service name - e.g. emissary, bartnet
+* revision - e.g. a git sha, latest
+
 Playbook: coreos-production
 ---------------------------
 
