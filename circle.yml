@@ -21,4 +21,3 @@ deployment:
       - docker tag -f $DOCKER_IMAGE:$CIRCLE_SHA1 $DOCKER_IMAGE:latest
       - docker push $DOCKER_IMAGE:$CIRCLE_SHA1
       - docker push $DOCKER_IMAGE:latest
-      - aws s3 cp compute s3://opsee-releases/bash/compute
