@@ -1,0 +1,49 @@
+load_balancers:
+  - name: notificaption
+    health_check:
+      ping_protocol: http
+      ping_port: 9099
+      ping_path: "/health"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: ssl
+        load_balancer_port: 443
+        instance_protocol: tcp
+        instance_port: 9099
+        ssl_certificate_id: "{{internal_certificate}}"
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
+
+dns_records:
+  - record: notificaption
+    load_balancer_name: notificaption
+    internal: yes
+
+tasks:
+  - family: notificaption
+    containerDefinitions:
+      - name: notificaption
+        image: quay.io/opsee/notificaption:{{ecs_image_tag}}
+        memory: 256
+        environment:
+          - name: APPENV
+            value: notificaptionenv-{{environment}}-{{region}}
+        portMappings:
+          - hostPort: 9099
+            containerPort: 9099
+            protocol: tcp
+        command:
+          - "npm start"
+
+services:
+  - serviceName: notificaption
+    taskDefinition: notificaption
+    loadBalancers:
+      - loadBalancerName: notificaption
+        containerName: notificaption
+        containerPort: 9099
+    desiredCount: 2
+    role: "{{ecs_role}}"
