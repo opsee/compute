@@ -32,7 +32,7 @@ tasks:
         cpu: 124
         environment:
           - name: APPENV
-            value: motornenv-{{environment}}-{{region}}
+            value: motornenv-{{opseeenv}}-{{region}}
         portMappings:
           - hostPort: 8083
             containerPort: 8083

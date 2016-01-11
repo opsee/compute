@@ -85,8 +85,8 @@
     assign_public_ip: yes
     instance_profile_name: "{{coreos_instance_profile}}"
     instance_tags:
-      Name: "CoreOS master {{environment}} {{item.availability_zone.name}}"
-      Environment: "{{environment}}"
+      Name: "CoreOS master {{opseeenv}} {{item.availability_zone.name}}"
+      Environment: "{{opseeenv}}"
       Role: "{{item.availability_zone.name}} master"
     count_tag:
       Role: "{{item.availability_zone.name}} master"
@@ -112,8 +112,8 @@
     assign_public_ip: yes
     instance_profile_name: "{{coreos_instance_profile}}"
     instance_tags:
-      Name: "CoreOS worker {{environment}} {{item.availability_zone.name}}"
-      Environment: "{{environment}}"
+      Name: "CoreOS worker {{opseeenv}} {{item.availability_zone.name}}"
+      Environment: "{{opseeenv}}"
       Role: "{{item.availability_zone.name}} worker"
     count_tag:
       Role: "{{item.availability_zone.name}} worker"

@@ -30,7 +30,7 @@ tasks:
         memory: 256
         environment:
           - name: APPENV
-            value: notificaptionenv-{{environment}}-{{region}}
+            value: notificaptionenv-{{opseeenv}}-{{region}}
         portMappings:
           - hostPort: 9099
             containerPort: 9099

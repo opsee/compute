@@ -2,7 +2,7 @@
 - hosts: localhost
   connection: local
   vars_files:
-    - ../environments/{{environment}}.yml
+    - ../environments/{{opseeenv}}.yml
 
   roles:
     - role: coreos

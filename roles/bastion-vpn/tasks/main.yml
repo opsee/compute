@@ -36,7 +36,7 @@
     instance_profile_name: "{{bastion_vpn_instance_profile}}"
     instance_tags:
       Name: "bastion-vpn {{environment_region}}"
-      Environment: "{{environment}}"
+      Environment: "{{opseeenv}}"
     count_tag:
       Name: "bastion-vpn {{environment_region}}"
     exact_count: 1

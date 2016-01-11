@@ -41,5 +41,5 @@
     username: "{{item.username}}"
     subnet: rds {{environment_region}}
     tags:
-      Environment: "{{environment}}"
+      Environment: "{{opseeenv}}"
   with_items: rds_instances

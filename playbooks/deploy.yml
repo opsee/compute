@@ -7,7 +7,7 @@
     ecs_image_tag: "{{lookup('env', 'IMAGE_TAG')}}"
 
   vars_files:
-    - ../environments/{{environment}}.yml
+    - ../environments/{{opseeenv}}.yml
 
   pre_tasks:
     - include: opsee-services-loader.yml

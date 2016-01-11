@@ -62,7 +62,7 @@ tasks:
         cpu: 64
         environment:
           - name: APPENV
-            value: vapenv-{{environment}}-{{region}}
+            value: vapenv-{{opseeenv}}-{{region}}
         portMappings:
           - hostPort: 9091
             containerPort: 9091
@@ -77,7 +77,7 @@ tasks:
         cpu: 64
         environment:
           - name: APPENV
-            value: vapenv-{{environment}}-{{region}}
+            value: vapenv-{{opseeenv}}-{{region}}
         portMappings:
           - hostPort: 8081
             containerPort: 8081

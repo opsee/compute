@@ -11,7 +11,7 @@
 
   vars_files:
     - ../secrets/databases.yml
-    - ../environments/{{environment}}.yml
+    - ../environments/{{opseeenv}}.yml
     - ../secrets/app-env.yml
 
   pre_tasks:

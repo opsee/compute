@@ -3,7 +3,7 @@
   connection: local
   vars_files:
     - ../secrets/strongswan_users.yml
-    - ../environments/{{environment}}.yml
+    - ../environments/{{opseeenv}}.yml
 
   roles:
     - role: strongswan

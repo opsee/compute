@@ -38,7 +38,7 @@ tasks:
         memory: 2048
         environment:
           - name: APPENV
-            value: beavisenv-{{environment}}-{{region}}
+            value: beavisenv-{{opseeenv}}-{{region}}
         portMappings:
           - hostPort: 2020
             containerPort: 2020

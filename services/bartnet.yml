@@ -39,7 +39,7 @@ tasks:
         cpu: 384
         environment:
           - name: APPENV
-            value: bartnetenv-{{environment}}-{{region}}
+            value: bartnetenv-{{opseeenv}}-{{region}}
         portMappings:
           - hostPort: 8080
             containerPort: 8080

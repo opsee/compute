@@ -1,6 +1,6 @@
 # region info
 region: us-west-2
-environment_region: "{{environment}}-{{region}}"
+environment_region: "{{opseeenv}}-{{region}}"
 vpc_id: vpc-b5f3a4d0
 vpc_subnet: "172.30.0.0/16"
 vpc_resolver: "172.30.0.2"

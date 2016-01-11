@@ -38,7 +38,7 @@ tasks:
         memory: 256
         environment:
           - name: APPENV
-            value: fierienv-{{environment}}-{{region}}
+            value: fierienv-{{opseeenv}}-{{region}}
         portMappings:
           - hostPort: 9092
             containerPort: 9092

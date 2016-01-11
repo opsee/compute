@@ -38,7 +38,7 @@ tasks:
         memory: 256
         environment:
           - name: APPENV
-            value: spanxenv-{{environment}}-{{region}}
+            value: spanxenv-{{opseeenv}}-{{region}}
         portMappings:
           - hostPort: 9095
             containerPort: 9095

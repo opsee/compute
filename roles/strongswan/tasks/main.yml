@@ -38,7 +38,7 @@
     instance_profile_name: "{{strongswan_instance_profile}}"
     instance_tags:
       Name: "StrongSwan gateway {{environment_region}}"
-      Environment: "{{environment}}"
+      Environment: "{{opseeenv}}"
     count_tag:
       Name: "StrongSwan gateway {{environment_region}}"
     exact_count: 1

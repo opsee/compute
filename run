@@ -26,6 +26,6 @@ if [ "${SERVICES}x" = "x" ]; then
   exit 1
 fi
 
-ARGS="-e environment=$ENVIRONMENT -f 1 -vvvv"
+ARGS="-e opseeenv=$ENVIRONMENT -f 1 -vvvv"
 
 SERVICES="$SERVICES" IMAGE_TAG="$IMAGE_TAG" ansible-playbook "playbooks/${PLAY}.yml" $ARGS
