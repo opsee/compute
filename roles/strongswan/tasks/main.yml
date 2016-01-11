@@ -1,9 +1,10 @@
 ---
 - name: generate secrets file and upload to encrypted storage via s3kms
-  shell: echo '{{ lookup('template', 'ipsec.secrets.j2') }}' | /opt/bin/s3kms put -b opsee-keys -o dev/ipsec-{{region}}.secrets -k alias/vinz-dev
+  shell: echo '{{ lookup('template', 'ipsec.secrets.j2') }}' |  AWS_DEFAULT_REGION=us-west-1 /usr/bin/env s3kms put -b opsee-keys -o dev/ipsec-{{region}}.secrets -k alias/vinz-dev
+  tags: strongswan-secrets
 
 - name: generate config file and upload to encrypted storage via s3kms
-  shell: echo '{{ lookup('template', 'ipsec.conf.j2') }}' | /opt/bin/s3kms put -b opsee-keys -o dev/ipsec-{{region}}.conf -k alias/vinz-dev
+  shell: echo '{{ lookup('template', 'ipsec.conf.j2') }}' |  AWS_DEFAULT_REGION=us-west-1 /usr/bin/env s3kms put -b opsee-keys -o dev/ipsec-{{region}}.conf -k alias/vinz-dev
 
 - name: keypair for strongswan
   ec2_key:
