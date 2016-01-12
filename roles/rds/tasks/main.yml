@@ -33,7 +33,7 @@
     instance_name: "{{item.db_name}}"
     instance_type: "{{item.instance_type}}"
     multi_zone: "{{item.multi_zone}}"
-    password: "{{database_passwords[environment][item.db_name]}}"
+    password: "{{database_passwords[opseeenv][item.db_name]}}"
     publicly_accessible: no
     region: "{{region}}"
     vpc_security_groups: "{{rds_security_group_result.group_id}}"
