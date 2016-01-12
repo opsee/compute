@@ -17,14 +17,6 @@ load_balancers:
     security_groups:
       - "{{coreos_internal_elb_security_group}}"
 
-db_instances:
-  - db_engine: postgres
-    db_name: cats
-    instance_type: db.m3.medium
-    multi_zone: yes
-    size: 100
-    username: cats
-
 dns_records:
   - record: cats
     load_balancer_name: cats
