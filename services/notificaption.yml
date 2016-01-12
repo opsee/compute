@@ -35,8 +35,6 @@ tasks:
           - hostPort: 9099
             containerPort: 9099
             protocol: tcp
-        command:
-          - "npm start"
 
 services:
   - serviceName: notificaption
