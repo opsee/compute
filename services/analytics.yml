@@ -1,0 +1,47 @@
+load_balancers:
+  - name: analytics
+    health_check:
+      ping_protocol: http
+      ping_port: 9098
+      ping_path: "/health"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: ssl
+        load_balancer_port: 443
+        instance_protocol: tcp
+        instance_port: 9098
+        ssl_certificate_id: "{{internal_certificate}}"
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
+
+dns_records:
+  - record: analytics
+    load_balancer_name: analytics
+    internal: yes
+
+tasks:
+  - family: analytics
+    containerDefinitions:
+      - name: analytics
+        image: quay.io/opsee/analytics:{{ecs_image_tag}}
+        memory: 256
+        environment:
+          - name: APPENV
+            value: analyticsenv-{{opseeenv}}-{{region}}
+        portMappings:
+          - hostPort: 9098
+            containerPort: 9098
+            protocol: tcp
+
+services:
+  - serviceName: analytics
+    taskDefinition: analytics
+    loadBalancers:
+      - loadBalancerName: analytics
+        containerName: analytics
+        containerPort: 9098
+    desiredCount: 2
+    role: "{{ecs_role}}"
