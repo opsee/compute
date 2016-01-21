@@ -1,5 +1,5 @@
 load_balancers:
-  - name: analytics
+  - name: myst
     health_check:
       ping_protocol: http
       ping_port: 9098
@@ -18,30 +18,30 @@ load_balancers:
       - "{{coreos_internal_elb_security_group}}"
 
 dns_records:
-  - record: analytics
-    load_balancer_name: analytics
+  - record: myst
+    load_balancer_name: myst
     internal: yes
 
 tasks:
-  - family: analytics
+  - family: myst
     containerDefinitions:
-      - name: analytics
-        image: quay.io/opsee/analytics:{{ecs_image_tag}}
+      - name: myst
+        image: quay.io/opsee/myst:{{ecs_image_tag}}
         memory: 256
         environment:
           - name: APPENV
-            value: analyticsenv-{{opseeenv}}-{{region}}
+            value: mystenv-{{opseeenv}}-{{region}}
         portMappings:
           - hostPort: 9098
             containerPort: 9098
             protocol: tcp
 
 services:
-  - serviceName: analytics
-    taskDefinition: analytics
+  - serviceName: myst
+    taskDefinition: myst
     loadBalancers:
-      - loadBalancerName: analytics
-        containerName: analytics
+      - loadBalancerName: myst
+        containerName: myst
         containerPort: 9098
     desiredCount: 2
     role: "{{ecs_role}}"
