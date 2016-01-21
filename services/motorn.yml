@@ -22,6 +22,9 @@ dns_records:
   - record: api
     load_balancer_name: motorn
     public: yes
+  - record: myst
+    load_balancer_name: motorn
+    public: yes
 
 tasks:
   - family: motorn
