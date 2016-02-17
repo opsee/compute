@@ -12,10 +12,9 @@
   pre_tasks:
     - include: opsee-services-loader.yml
 
-    - name: set the image tag
-      set_fact:
-        ecs_image_tag: latest
-      when: ecs_image_tag == ""
+    - name: ensure image tag is specified
+      fail: msg="You must specify a versioned container image tag."
+      when: ecs_image_tag == "" or ecs_image_tag == "latest"
 
     - name: set ecs tasks
       set_fact:
