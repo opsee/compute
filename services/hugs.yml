@@ -36,7 +36,17 @@ tasks:
             containerPort: 9097
             protocol: tcp
         command:
-          - "/run.sh"
+          - "/run.sh hugs"
+  - family: hugs-worker
+    containerDefinitions:
+      - name: hugs
+        image: quay.io/opsee/hugs:{{ecs_image_tag}}
+        memory: 32
+        environment:
+          - name: APPENV
+            value: hugsenv-{{opseeenv}}-{{region}}
+        command:
+          - "/run.sh worker"
 
 services:
   - serviceName: hugs
@@ -45,5 +55,9 @@ services:
       - loadBalancerName: hugs 
         containerName: hugs
         containerPort: 9097
+    desiredCount: 2
+    role: "{{ecs_role}}"
+  - serviceName: hugs-worker
+    taskDefinition: hugs-worker
     desiredCount: 2
     role: "{{ecs_role}}"
