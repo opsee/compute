@@ -26,12 +26,6 @@ if [ "${SERVICES}x" = "x" ]; then
   exit 1
 fi
 
-if [ "${IMAGE_TAG}" = "latest" ] || [ "${IMAGE_TAG}x" = "x" ]; then
-  echo "You must specify a specific container revision. Do not use the :latest image-tag."
-  usage
-  exit 1
-fi
-
 ARGS="-e opseeenv=$ENVIRONMENT -f 1 -vvvv"
 
 SERVICES="$SERVICES" IMAGE_TAG="$IMAGE_TAG" ansible-playbook "playbooks/${PLAY}.yml" $ARGS
