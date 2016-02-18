@@ -36,7 +36,7 @@ tasks:
             containerPort: 9097
             protocol: tcp
         command:
-          - "/run.sh hugs"
+          - "/run.sh"
   - family: hugs-worker
     containerDefinitions:
       - name: hugs
@@ -46,7 +46,8 @@ tasks:
           - name: APPENV
             value: hugsenv-{{opseeenv}}-{{region}}
         command:
-          - "/run.sh worker"
+          - "/run.sh" 
+          - "worker"
 
 services:
   - serviceName: hugs
@@ -61,3 +62,4 @@ services:
     taskDefinition: hugs-worker
     desiredCount: 2
     role: "{{ecs_role}}"
+    loadBalancers: []
