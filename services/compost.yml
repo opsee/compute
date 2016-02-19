@@ -1,0 +1,49 @@
+load_balancers:
+  - name: compost
+    health_check:
+      ping_protocol: http
+      ping_port: 9096
+      ping_path: "/health"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: ssl
+        load_balancer_port: 443
+        instance_protocol: tcp
+        instance_port: 9096
+        ssl_certificate_id: "{{internal_certificate}}"
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
+
+dns_records:
+  - record: compost
+    load_balancer_name: compost
+    internal: yes
+
+tasks:
+  - family: compost
+    containerDefinitions:
+      - name: compost
+        image: quay.io/opsee/compost:{{ecs_image_tag}}
+        memory: 256
+        environment:
+          - name: APPENV
+            value: compostenv-{{opseeenv}}-{{region}}
+        portMappings:
+          - hostPort: 9096
+            containerPort: 9096
+            protocol: tcp
+        command:
+          - "/run.sh"
+
+services:
+  - serviceName: compost
+    taskDefinition: compost
+    loadBalancers:
+      - loadBalancerName: compost
+        containerName: compost
+        containerPort: 9096
+    desiredCount: 2
+    role: "{{ecs_role}}"
