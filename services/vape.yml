@@ -1,7 +1,7 @@
 load_balancers:
   - name: vape-private
     health_check:
-      ping_protocol: http
+      ping_protocol: https
       ping_port: 9091
       ping_path: "/health"
       response_timeout: 2
@@ -9,9 +9,9 @@ load_balancers:
       unhealthy_threshold: 2
       healthy_threshold: 5
     listeners:
-      - protocol: https
+      - protocol: tcp
         load_balancer_port: 443
-        instance_protocol: http
+        instance_protocol: tcp
         instance_port: 9091
         ssl_certificate_id: "{{internal_certificate}}"
     security_groups:
