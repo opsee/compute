@@ -1,16 +1,15 @@
 load_balancers:
   - name: spanx
     health_check:
-      ping_protocol: http
+      ping_protocol: tcp
       ping_port: 9095
-      ping_path: "/health"
       response_timeout: 2
       interval: 5
       unhealthy_threshold: 2
       healthy_threshold: 5
     listeners:
-      - protocol: ssl
-        load_balancer_port: 443
+      - protocol: tcp
+        load_balancer_port: 8443
         instance_protocol: tcp
         instance_port: 9095
         ssl_certificate_id: "{{internal_certificate}}"
