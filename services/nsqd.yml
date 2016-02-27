@@ -47,7 +47,7 @@ tasks:
         entryPoint:
           - "/entrypoint"
           - "-lookupd-tcp-address=nsqlookupd-1.{{internal_domain}}:4160"
-          # - "-lookupd-tcp-address=nsqlookupd-2.{{internal_domain}}:4160"
+           - "-lookupd-tcp-address=nsqlookupd-2.{{internal_domain}}:4160"
           - "-verbose"
 
 services:
