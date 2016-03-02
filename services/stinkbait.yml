@@ -1,0 +1,49 @@
+load_balancers:
+  - name: stinkbait
+    health_check:
+      ping_protocol: https
+      ping_port: 9100
+      ping_path: "/health"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: tcp
+        load_balancer_port: 443
+        instance_protocol: tcp
+        instance_port: 9100
+        ssl_certificate_id: "{{internal_certificate}}"
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
+
+dns_records:
+  - record: stinkbait
+    load_balancer_name: stinkbait
+    internal: yes
+
+tasks:
+  - family: stinkbait
+    containerDefinitions:
+      - name: stinkbait
+        image: quay.io/opsee/stinkbait:{{ecs_image_tag}}
+        memory: 256
+        environment:
+          - name: APPENV
+            value: stinkbaitenv-{{opseeenv}}-{{region}}
+        portMappings:
+          - hostPort: 9100
+            containerPort: 9100
+            protocol: tcp
+        command:
+          - "/run.sh"
+
+services:
+  - serviceName: stinkbait
+    taskDefinition: stinkbait
+    loadBalancers:
+      - loadBalancerName: stinkbait
+        containerName: stinkbait
+        containerPort: 9100
+    desiredCount: 2
+    role: "{{ecs_role}}"
