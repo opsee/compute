@@ -64,6 +64,7 @@ coreos_vpn_security_group: "{{strongswan_security_group}}"
 coreos_ssh_elb_security_group: "CoreOS cluster ssh ELB {{environment_region}}"
 coreos_internal_elb_security_group: "CoreOS cluster internal ELB {{environment_region}}"
 coreos_public_elb_security_group: "CoreOS cluster public ELB {{environment_region}}"
+coreos_cloudfront_elb_security_group: "CoreOS cluster cloudfront ELB {{environment_region}}"
 coreos_keypair: "CoreOS cluster keypair {{environment_region}}"
 coreos_instance_profile: CoreOS_Cluster_Role
 coreos_ami: ami-ed8b90dd

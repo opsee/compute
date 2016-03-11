@@ -15,7 +15,9 @@ load_balancers:
         instance_port: 9100
         ssl_certificate_id: "{{internal_certificate}}"
     security_groups:
+      - "{{coreos_cloudfront_elb_security_group}}"
       - "{{coreos_internal_elb_security_group}}"
+    scheme: internet-facing
 
 dns_records:
   - record: stinkbait
