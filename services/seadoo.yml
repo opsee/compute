@@ -2,17 +2,17 @@ load_balancers:
   - name: seadoo
     health_check:
       ping_protocol: http
-      ping_port: 80
+      ping_port: 9102
       ping_path: "/index.html"
       response_timeout: 2
       interval: 5
       unhealthy_threshold: 2
       healthy_threshold: 5
     listeners:
-      - protocol: http
-        load_balancer_port: 80
+      - protocol: https
+        load_balancer_port: 443
         instance_protocol: http
-        instance_port: 80
+        instance_port: 9102
         ssl_certificate_id: "{{internal_certificate}}"
     security_groups:
       - "{{coreos_internal_elb_security_group}}"
@@ -30,8 +30,8 @@ tasks:
         memory: 256
         cpu: 64
         portMappings:
-          - hostPort: 80
-            containerPort: 80
+          - hostPort: 9102
+            containerPort: 9102
             protocol: tcp
 
 services:
@@ -40,6 +40,6 @@ services:
     loadBalancers:
       - loadBalancerName: seadoo
         containerName: seadoo
-        containerPort: 80
+        containerPort: 9102
     desiredCount: 2
     role: "{{ecs_role}}"
