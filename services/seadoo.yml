@@ -1,0 +1,45 @@
+load_balancers:
+  - name: seadoo
+    health_check:
+      ping_protocol: http
+      ping_port: 80
+      ping_path: "/index.html"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: http
+        load_balancer_port: 80
+        instance_protocol: http
+        instance_port: 80
+        ssl_certificate_id: "{{internal_certificate}}"
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
+
+dns_records:
+  - record: seadoo
+    load_balancer_name: seadoo
+    internal: yes
+
+tasks:
+  - family: seadoo
+    containerDefinitions:
+      - name: seadoo
+        image: quay.io/opsee/seadoo:{{ecs_image_tag}}
+        memory: 256
+        cpu: 64
+        portMappings:
+          - hostPort: 80
+            containerPort: 80
+            protocol: tcp
+
+services:
+  - serviceName: seadoo
+    taskDefinition: seadoo
+    loadBalancers:
+      - loadBalancerName: seadoo
+        containerName: seadoo
+        containerPort: 80
+    desiredCount: 2
+    role: "{{ecs_role}}"
