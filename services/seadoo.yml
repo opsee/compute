@@ -3,7 +3,7 @@ load_balancers:
     health_check:
       ping_protocol: http
       ping_port: 9102
-      ping_path: "/index.html"
+      ping_path: "/login"
       response_timeout: 2
       interval: 5
       unhealthy_threshold: 2
