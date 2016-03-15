@@ -35,7 +35,7 @@ tasks:
             protocol: tcp
 
 services:
-  - serviceName: seadoo
+  - serviceName: admin
     taskDefinition: seadoo
     loadBalancers:
       - loadBalancerName: seadoo
