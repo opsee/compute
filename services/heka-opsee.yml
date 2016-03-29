@@ -14,7 +14,7 @@ tasks:
 
 services:
   - serviceName: heka-opsee
-    taskDefinition: heka-oposee
+    taskDefinition: heka-opsee
     loadBalancers: []
     desiredCount: 1
     role: "{{ecs_role}}"
