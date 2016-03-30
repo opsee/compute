@@ -60,6 +60,7 @@ tasks:
       - name: nsqlookupd
         image: nsqio/nsq:v0.3.5
         memory: 256
+        logConfiguration: {"logDriver":"json-file", options: {"max-size": "10m","max-file": "3"}}
         portMappings:
           - hostPort: 4160
             containerPort: 4160

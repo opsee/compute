@@ -33,6 +33,7 @@ tasks:
       - name: nsqd
         image: quay.io/opsee/nsqd:latest
         memory: 256
+        logConfiguration: {"logDriver":"json-file", options: {"max-size": "10m","max-file": "3"}}
         portMappings:
           - hostPort: 4150
             containerPort: 4150
@@ -48,7 +49,6 @@ tasks:
           - "/entrypoint"
           - "-lookupd-tcp-address=nsqlookupd-1.{{internal_domain}}:4160"
           - "-lookupd-tcp-address=nsqlookupd-2.{{internal_domain}}:4160"
-          - "-verbose"
 
 services:
   - serviceName: nsqd

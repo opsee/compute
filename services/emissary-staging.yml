@@ -28,6 +28,7 @@ tasks:
       - name: emissary-staging
         image: quay.io/opsee/emissary:{{ecs_image_tag}}
         memory: 256
+        logConfiguration: {"logDriver":"json-file", options: {"max-size": "10m","max-file": "3"}}
         cpu: 64
         portMappings:
           - hostPort: 9103

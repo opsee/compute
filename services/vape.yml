@@ -60,6 +60,7 @@ tasks:
         image: quay.io/opsee/vape:{{ecs_image_tag}}
         memory: 256
         cpu: 64
+        logConfiguration: {"logDriver":"json-file", options: {"max-size": "10m","max-file": "3"}}
         environment:
           - name: APPENV
             value: vapenv-{{opseeenv}}-{{region}}
@@ -75,6 +76,7 @@ tasks:
         image: quay.io/opsee/vape:{{ecs_image_tag}}
         memory: 256
         cpu: 64
+        logConfiguration: {"logDriver":"json-file", options: {"max-size": "10m","max-file": "3"}}
         environment:
           - name: APPENV
             value: vapenv-{{opseeenv}}-{{region}}

@@ -36,6 +36,7 @@ tasks:
       - name: bartnet
         image: quay.io/opsee/bartnet:{{ecs_image_tag}}
         memory: 2048
+        logConfiguration: {"logDriver":"json-file", options: {"max-size": "10m","max-file": "3"}}
         cpu: 384
         environment:
           - name: APPENV

@@ -28,6 +28,7 @@ tasks:
       - name: compost
         image: quay.io/opsee/compost:{{ecs_image_tag}}
         memory: 256
+        logConfiguration: {"logDriver":"json-file", options: {"max-size": "10m","max-file": "3"}}
         environment:
           - name: APPENV
             value: compostenv-{{opseeenv}}-{{region}}
