@@ -36,6 +36,7 @@ tasks:
       - name: beavis
         image: quay.io/opsee/beavis:{{ecs_image_tag}}
         memory: 2048
+        logConfiguration: {"logDriver":"json-file", options: {"max-size": "10m","max-file": "3"}}
         environment:
           - name: APPENV
             value: beavisenv-{{opseeenv}}-{{region}}

@@ -4,6 +4,7 @@ tasks:
       - name: bastion-connect
         image: quay.io/opsee/zuul:{{ecs_image_tag}}
         memory: 256
+        logConfiguration: {"logDriver":"json-file", options: {"max-size": "10m","max-file": "3"}}
         command:
           - connect
           - "--etcd-address=http://etcd.{{internal_domain}}:2479"

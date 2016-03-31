@@ -33,6 +33,7 @@ tasks:
         image: quay.io/opsee/motorn:{{ecs_image_tag}}
         memory: 256
         cpu: 124
+        logConfiguration: {"logDriver":"json-file", options: {"max-size": "10m","max-file": "3"}}
         environment:
           - name: APPENV
             value: motornenv-{{opseeenv}}-{{region}}

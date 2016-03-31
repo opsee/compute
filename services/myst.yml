@@ -28,6 +28,7 @@ tasks:
       - name: myst
         image: quay.io/opsee/myst:{{ecs_image_tag}}
         memory: 256
+        logConfiguration: {"logDriver":"json-file", options: {"max-size": "10m","max-file": "3"}}
         environment:
           - name: APPENV
             value: mystenv-{{opseeenv}}-{{region}}
