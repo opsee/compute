@@ -68,7 +68,7 @@ coreos_cloudfront_elb_security_group: "CoreOS cluster cloudfront ELB {{environme
 coreos_keypair: "CoreOS cluster keypair {{environment_region}}"
 coreos_instance_profile: CoreOS_Cluster_Role
 coreos_ami: ami-ed8b90dd
-coreos_master_instance_type: t2.micro
+coreos_master_instance_type: c4.large
 coreos_worker_instance_type: m4.large
 coreos_master_deployment:
   - availability_zone: "{{availability_zones['us-west-2a']}}"
