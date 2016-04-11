@@ -44,8 +44,13 @@ tasks:
           - hostPort: 2020
             containerPort: 2020
             protocol: tcp
+          - hostPort: 5555
+            containerPort: 5555
+            protocol: tcp
         command:
           - migrate-start
+          - "-Xmx1920m"
+          - "-Xms256m"
 
 services:
   - serviceName: beavis
