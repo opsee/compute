@@ -47,6 +47,8 @@ tasks:
             protocol: tcp
         command:
           - migrate-start
+          - "-Xmx1920m"
+          - "-Xms256m"
 
 services:
   - serviceName: bartnet
