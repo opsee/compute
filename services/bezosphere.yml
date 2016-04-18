@@ -1,0 +1,57 @@
+load_balancers:
+  - name: bezosphere
+    health_check:
+      ping_protocol: tcp
+      ping_port: 9104
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: tcp
+        load_balancer_port: 8443
+        instance_protocol: tcp
+        instance_port: 9104
+        ssl_certificate_id: "{{internal_certificate}}"
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
+
+db_instances:
+  - db_engine: postgres
+    db_name: bezosphere
+    instance_type: db.m3.medium
+    multi_zone: no
+    size: 100
+    username: bezosphere
+
+dns_records:
+  - record: bezosphere
+    load_balancer_name: bezosphere
+    internal: yes
+
+tasks:
+  - family: bezosphere
+    containerDefinitions:
+      - name: bezosphere
+        image: quay.io/opsee/bezosphere:{{ecs_image_tag}}
+        memory: 256
+        logConfiguration: {"logDriver":"json-file", options: {"max-size": "10m","max-file": "3"}}
+        environment:
+          - name: APPENV
+            value: bezospherenv-{{opseeenv}}-{{region}}
+        portMappings:
+          - hostPort: 9104
+            containerPort: 9104
+            protocol: tcp
+        command:
+          - "/run.sh"
+
+services:
+  - serviceName: bezosphere
+    taskDefinition: bezosphere
+    loadBalancers:
+      - loadBalancerName: bezosphere
+        containerName: bezosphere
+        containerPort: 9104
+    desiredCount: 2
+    role: "{{ecs_role}}"
