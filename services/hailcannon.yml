@@ -32,8 +32,8 @@ tasks:
           - name: APPENV
             value: hailcannonnv-{{opseeenv}}-{{region}}
         portMappings:
-          - hostPort: 9104
-            containerPort: 9104
+          - hostPort: 9109
+            containerPort: 9109
             protocol: tcp
         command:
           - "/run.sh"
@@ -44,6 +44,6 @@ services:
     loadBalancers:
       - loadBalancerName: hailcannon
         containerName: hailcannon
-        containerPort: 9104
+        containerPort: 9109
     desiredCount: 2
     role: "{{ecs_role}}"
