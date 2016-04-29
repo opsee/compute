@@ -1,0 +1,49 @@
+load_balancers:
+  - name: hailcannon
+    health_check:
+      ping_protocol: tcp
+      ping_port: 9109
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: tcp
+        load_balancer_port: 8443
+        instance_protocol: tcp
+        instance_port: 9109
+        ssl_certificate_id: "{{internal_certificate}}"
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
+
+dns_records:
+  - record: hailcannon
+    load_balancer_name: hailcannon
+    internal: yes
+
+tasks:
+  - family: hailcannon
+    containerDefinitions:
+      - name: hailcannon
+        image: quay.io/opsee/hailcannon:{{ecs_image_tag}}
+        memory: 256
+        logConfiguration: {"logDriver":"json-file", options: {"max-size": "10m","max-file": "3"}}
+        environment:
+          - name: APPENV
+            value: hailcannonnv-{{opseeenv}}-{{region}}
+        portMappings:
+          - hostPort: 9104
+            containerPort: 9104
+            protocol: tcp
+        command:
+          - "/run.sh"
+
+services:
+  - serviceName: hailcannon
+    taskDefinition: hailcannon
+    loadBalancers:
+      - loadBalancerName: hailcannon
+        containerName: hailcannon
+        containerPort: 9104
+    desiredCount: 2
+    role: "{{ecs_role}}"
