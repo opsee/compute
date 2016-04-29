@@ -1,6 +1,15 @@
 load_balancers:
   - name: hailcannon
     listeners:
+    health_check:
+      ping_protocol: http
+      ping_port: 9109
+      ping_path: "/health"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
       - protocol: tcp
         load_balancer_port: 8443
         instance_protocol: tcp
