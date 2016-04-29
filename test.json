@@ -1,0 +1,10 @@
+[
+  {
+    "check-id": "37MlVXXaU4MUvHHN83pbjX",
+    "notifications":[{"type":"email","value":"dantest@opsee.com"}]
+  },
+  {
+    "check-id": "7K1CCGXrZ4OBh9bEUw4pmb",
+    "notifications":[{"type":"email","value":"dantest@opsee.com"}]
+  }
+]

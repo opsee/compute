@@ -16,3 +16,5 @@ python-dateutil==2.4.2
 PyYAML==3.11
 six==1.10.0
 wheel==0.24.0
+cffi==1.5.2               # via cryptography
+pycparser==2.14           # via cffi
