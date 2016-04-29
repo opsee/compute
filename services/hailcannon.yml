@@ -1,12 +1,5 @@
 load_balancers:
   - name: hailcannon
-    health_check:
-      ping_protocol: tcp
-      ping_port: 9109
-      response_timeout: 2
-      interval: 5
-      unhealthy_threshold: 2
-      healthy_threshold: 5
     listeners:
       - protocol: tcp
         load_balancer_port: 8443
@@ -45,5 +38,5 @@ services:
       - loadBalancerName: hailcannon
         containerName: hailcannon
         containerPort: 9109
-    desiredCount: 2
+    desiredCount: 1
     role: "{{ecs_role}}"
