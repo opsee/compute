@@ -32,7 +32,7 @@ public_domain: "opsee.com"
 dns_addresses: "169.254.169.253" # temporary
 
 # strongswan vpn
-strongswan_gateway_name: "{{environment_region}}.vpn.opsee.com"
+strongswan_gateway_name: "{{region}}.vpn.opsee.com"
 strongswan_gateway_ip: "{{availability_zones['us-west-2a'].cidr | ipsubnet(24, 0) | ipaddr(-1) | ipaddr('address') }}"
 strongswan_gateway_subnet: "{{vpc_subnet}}"
 strongswan_client_subnet: "10.100.255.0/24"

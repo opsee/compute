@@ -7,10 +7,12 @@ config setup
         # uniqueids = no
 
 conn %default
-        ikelifetime=60m
-        keylife=20m
-        rekeymargin=3m
-        keyingtries=1
+        ikelifetime=3h
+        keylife=1h
+        rekey=yes
+        reauth=yes
+        rekeymargin=9m
+        keyingtries=3
         keyexchange=ikev2
         authby=secret
 
