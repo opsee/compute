@@ -1,0 +1,19 @@
+tasks:
+  - family: pracovnik
+    containerDefinitions:
+      - name: pracovnik
+        image: quay.io/opsee/pracovnik:{{ecs_image_tag}}
+        memory: 128
+        logConfiguration: {"logDriver":"json-file", options: {"max-size": "10m","max-file": "3"}}
+        environment:
+          - name: APPENV
+            value: pracovnikenv-{{opseeenv}}-{{region}}
+        command:
+          - "/run.sh"
+
+services:
+  - serviceName: pracovnik
+    taskDefinition: pracovnik
+    loadBalancers: []
+    desiredCount: 2
+    role: "{{ecs_role}}"
