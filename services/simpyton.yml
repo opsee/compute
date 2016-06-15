@@ -1,0 +1,49 @@
+load_balancers:
+  - name: simpyton
+    listeners:
+    health_check:
+      ping_protocol: http
+      ping_port: 8000
+      ping_path: "/services/200"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: tcp
+        load_balancer_port: 8000
+        instance_protocol: tcp
+        instance_port: 8000
+        ssl_certificate_id: "{{internal_certificate}}"
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
+
+dns_records:
+  - record: simpyton
+    load_balancer_name: simpyton
+    internal: yes
+
+tasks:
+  - family: simpyton
+    containerDefinitions:
+      - name: simpyton
+        image: quay.io/opsee/simpyton:{{ecs_image_tag}}
+        memory: 128
+        logConfiguration: {"logDriver":"json-file", options: {"max-size": "10m","max-file": "3"}}
+        environment:
+          - name: APPENV
+            value: simpytonenv-{{opseeenv}}-{{region}}
+        portMappings:
+          - hostPort: 8000
+            containerPort: 8000
+            protocol: tcp
+
+services:
+  - serviceName: simpyton
+    taskDefinition: simpyton
+    loadBalancers:
+      - loadBalancerName: simpyton
+        containerName: simpyton
+        containerPort: 8000
+    desiredCount: 1
+    role: "{{ecs_role}}"
