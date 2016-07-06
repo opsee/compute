@@ -149,6 +149,7 @@ write_files:
       ECS_DATADIR=/data/
       ECS_ENGINE_AUTH_TYPE=dockercfg
       ECS_ENGINE_AUTH_DATA={"quay.io": { "auth": "b3BzZWUrb3BzZWVjaTpGNFE2RlJWMVpaT1FWV0hHVDNIU0gzSVlKOEFJOUYxUk5RWVVLTFFKUVpKVUU3MTFWSjZSSUJBVlg4VkJLV1lI", "email": "ci@opsee.com" } }
+      ECS_AVAILABLE_LOGGING_DRIVERS=["json-file","syslog"]
   - path: /home/core/.dockercfg
     permissions: 0600
     owner: core
