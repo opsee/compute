@@ -1,0 +1,3 @@
+{
+    "syslog-address": "tcp+tls://logs3.papertrailapp.com:51722"
+}
