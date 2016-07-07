@@ -46,7 +46,7 @@ tasks:
             containerPort: 8080
             protocol: tcp
         command:
-          - migrate-start
+          - start
           - "-Xmx1920m"
           - "-Xms256m"
 
