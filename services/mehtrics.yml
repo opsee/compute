@@ -1,0 +1,21 @@
+tasks:
+  - family: mehtrics
+    containerDefinitions:
+      - name: mehtrics
+        image: quay.io/opsee/mehtrics:{{ecs_image_tag}}
+        logConfiguration: {"logDriver":"json-file", options: {"max-size": "100m","max-file": "3"}}
+        memory: 256
+        portMappings:
+          - hostPort: 4352
+            containerPort: 4352
+            protocol: tcp
+        command:
+          - "hekad"
+          - "-config=/etc/heka/conf.d"
+
+services:
+  - serviceName: mehtrics
+    taskDefinition: mehtrics
+    loadBalancers: []
+    desiredCount: 1
+    role: "{{ecs_role}}"

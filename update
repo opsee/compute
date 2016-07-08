@@ -1,0 +1,23 @@
+Using /Users/dancompton/Opsee/compute/ansible.cfg as config file
+Loaded callback default of type stdout, v2.0
+1 plays in playbooks/deploy.yml
+
+PLAY ***************************************************************************
+
+TASK [setup] *******************************************************************
+ESTABLISH LOCAL CONNECTION FOR USER: dancompton
+127.0.0.1 EXEC ( umask 22 && mkdir -p "$( echo $HOME/.ansible/tmp/ansible-tmp-1467762940.14-45846394399889 )" && echo "$( echo $HOME/.ansible/tmp/ansible-tmp-1467762940.14-45846394399889 )" )
+127.0.0.1 PUT /var/folders/_g/zzpztbv90tz8gj2t_m_rz3qc0000gn/T/tmpwnC6OL TO /Users/dancompton/.ansible/tmp/ansible-tmp-1467762940.14-45846394399889/setup
+127.0.0.1 EXEC LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 LC_MESSAGES=en_US.UTF-8 /Users/dancompton/Opsee/compute/.env/bin/python /Users/dancompton/.ansible/tmp/ansible-tmp-1467762940.14-45846394399889/setup; rm -rf "/Users/dancompton/.ansible/tmp/ansible-tmp-1467762940.14-45846394399889/" > /dev/null 2>&1
+ok: [localhost]
+
+TASK [include] *****************************************************************
+task path: /Users/dancompton/Opsee/compute/playbooks/deploy.yml:13
+included: /Users/dancompton/Opsee/compute/playbooks/opsee-services-loader.yml for localhost
+
+TASK [set the services env] ****************************************************
+task path: /Users/dancompton/Opsee/compute/playbooks/opsee-services-loader.yml:2
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=2    changed=0    unreachable=0    failed=0   
+
