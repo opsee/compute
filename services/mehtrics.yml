@@ -1,0 +1,23 @@
+tasks:
+  - family: mehtrics
+    containerDefinitions:
+      - name: mehtrics
+        image: quay.io/opsee/mehtrics:{{ecs_image_tag}}
+        memory: 256
+        logConfiguration: {"logDriver":"json-file", options: {"max-size": "10m","max-file": "3"}}
+        environment:
+          - name: APPENV
+            value: mehtricsenv-{{opseeenv}}-{{region}}
+        portMappings:
+          - hostPort: 9111
+            containerPort: 9111
+            protocol: tcp
+        command:
+          - "/run.sh"
+
+services:
+  - serviceName: mehtrics
+    taskDefinition: mehtrics
+    loadBalancers: []
+    desiredCount: 1
+    role: "{{ecs_role}}"
