@@ -6,12 +6,11 @@ tasks:
         logConfiguration: {"logDriver":"json-file", options: {"max-size": "100m","max-file": "3"}}
         memory: 256
         portMappings:
-          - hostPort: 4352
-            containerPort: 4352
+          - hostPort: 9111
+            containerPort: 9111
             protocol: tcp
         command:
-          - "hekad"
-          - "-config=/etc/heka/conf.d"
+          - "/run.sh"
 
 services:
   - serviceName: mehtrics
