@@ -1,0 +1,5 @@
+{
+    "command": ["/run.sh"],
+    "image": "quay.io/opsee/pracovnik:c4c5b00",
+    "memory": 32
+}
