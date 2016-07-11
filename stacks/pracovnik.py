@@ -6,6 +6,7 @@ from os import path
 
 import troposphere
 import troposphere.ecs as ecs
+import troposphere.s3 as s3
 
 class Stack(object):
     ServiceName = 'pracovnik'
@@ -18,6 +19,13 @@ class Stack(object):
         self._template()
 
     def _template(self):
+        latest_results_bucket_name = '%s-%s' % (self.config['results-s3-bucket-latest'], self.env)
+        latest_bucket = s3.Bucket('LatestResultsBucket%s' % self.env.title())
+        latest_bucket.AccessControl = 'Private'
+        latest_bucket.BucketName = latest_results_bucket_name
+        latest_bucket.Tags = s3.Tags(environment=self.env)
+        self.t.add_resource(latest_bucket)
+
         task = ecs.TaskDefinition('%s%sTask' % (self.ServiceName.title(), self.env.title()))
         container = ecs.ContainerDefinition()
         container.Name = self.ServiceName
@@ -34,7 +42,11 @@ class Stack(object):
             }
         )
         container.Command = self.config['command']
-        container.Environment = [ecs.Environment(Name='APPENV', Value='%senv-%s-%s' % (self.ServiceName, self.env, self.region))]
+        container.Environment = [
+            # TODO(greg): could probably clean this up in cats by making the postgres conn thing better idk.
+            ecs.Environment(Name='APPENV', Value='catsenv-%s-%s' % (self.env, self.region)),
+            ecs.Environment(Name='CATS_RESULTS_S3_BUCKET', Value=latest_results_bucket_name)
+        ]
 
         task.ContainerDefinitions = [container]
         self.t.add_resource(task)

@@ -1,3 +1,4 @@
 {
-    "syslog-address": "tcp+tls://logs3.papertrailapp.com:51722"
+    "syslog-address": "tcp+tls://logs3.papertrailapp.com:51722",
+    "results-s3-bucket-latest": "opsee-results-latest"
 }
