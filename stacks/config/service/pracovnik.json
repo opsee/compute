@@ -1,5 +1,5 @@
 {
     "command": ["/run.sh", "pracovnik"],
-    "image": "quay.io/opsee/cats:d59beaf",
+    "image": "quay.io/opsee/cats:6d06ba6",
     "memory": 128
 }
