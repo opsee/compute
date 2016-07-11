@@ -19,5 +19,5 @@ services:
   - serviceName: mehtrics
     taskDefinition: mehtrics
     loadBalancers: []
-    desiredCount: 1
+    desiredCount: 2
     role: "{{ecs_role}}"
