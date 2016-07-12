@@ -1,8 +1,8 @@
 load_balancers:
   - name: mehtrics
     health_check:
-      ping_protocol: http
-      ping_port: 9112
+      ping_protocol: https
+      ping_port: 9111
       ping_path: "/health"
       response_timeout: 2
       interval: 5
