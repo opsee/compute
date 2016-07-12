@@ -1,5 +1,5 @@
 load_balancers:
-  - name: mehtrics
+  - name: marktricks
     health_check:
       ping_protocol: https
       ping_port: 9111
@@ -18,14 +18,14 @@ load_balancers:
       - "{{coreos_internal_elb_security_group}}"
 
 dns_records:
-  - record: mehtrics
-    load_balancer_name: mehtrics
+  - record: marktricks
+    load_balancer_name: marktricks
     internal: yes
 
 tasks:
-  - family: mehtrics
+  - family: marktricks
     containerDefinitions:
-      - name: mehtrics
+      - name: marktricks
         image: quay.io/opsee/mehtrics:{{ecs_image_tag}}
         memory: 256
         logConfiguration: {"logDriver":"json-file", options: {"max-size": "10m","max-file": "3"}}
@@ -40,11 +40,11 @@ tasks:
           - "/run.sh"
 
 services:
-  - serviceName: mehtrics
-    taskDefinition: mehtrics
+  - serviceName: marktricks
+    taskDefinition: marktricks
     loadBalancers:
-      - loadBalancerName: mehtrics
-        containerName: mehtrics
+      - loadBalancerName: marktricks
+        containerName: marktricks
         containerPort: 9111
     desiredCount: 2
     role: "{{ecs_role}}"
