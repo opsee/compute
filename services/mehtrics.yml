@@ -1,3 +1,27 @@
+load_balancers:
+  - name: hugs
+    health_check:
+      ping_protocol: http
+      ping_port: 9112
+      ping_path: "/health"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: tcp
+        load_balancer_port: 9111
+        instance_protocol: tcp
+        instance_port: 9111
+        ssl_certificate_id: "{{internal_certificate}}"
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
+
+dns_records:
+  - record: mehtrics
+    load_balancer_name: mehtrics
+    internal: yes
+
 tasks:
   - family: mehtrics
     containerDefinitions:
@@ -18,6 +42,10 @@ tasks:
 services:
   - serviceName: mehtrics
     taskDefinition: mehtrics
-    loadBalancers: []
+    loadBalancers:
+      - loadBalancerName: mehtrics
+        containerName: mehtrics
+        containerPort: 9111
+    
     desiredCount: 2
     role: "{{ecs_role}}"
