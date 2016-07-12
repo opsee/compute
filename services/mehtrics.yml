@@ -10,7 +10,7 @@ load_balancers:
       healthy_threshold: 5
     listeners:
       - protocol: tcp
-        load_balancer_port: 9111
+        load_balancer_port: 443
         instance_protocol: tcp
         instance_port: 9111
         ssl_certificate_id: "{{internal_certificate}}"
@@ -46,6 +46,5 @@ services:
       - loadBalancerName: mehtrics
         containerName: mehtrics
         containerPort: 9111
-    
     desiredCount: 2
     role: "{{ecs_role}}"
