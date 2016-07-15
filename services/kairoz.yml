@@ -1,0 +1,26 @@
+load_balancers:
+  - name: kairoz
+    health_check:
+      ping_protocol: https
+      ping_port: 9113
+      ping_path: "/"
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: tcp
+        load_balancer_port: 443
+        instance_protocol: tcp
+        instance_port: 9113
+        ssl_certificate_id: "{{internal_certificate}}"
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
+
+dns_records:
+  - record: kairoz
+    load_balancer_name: kairoz
+    internal: yes
+
+tasks: []
+services: []
