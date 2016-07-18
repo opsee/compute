@@ -11,7 +11,7 @@ load_balancers:
     listeners:
       - protocol: tcp
         load_balancer_port: 443
-        instance_protocol: tcp
+        instance_protocol: HTTP
         instance_port: 9113
         ssl_certificate_id: "{{internal_certificate}}"
     security_groups:
