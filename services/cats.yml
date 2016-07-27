@@ -16,8 +16,27 @@ load_balancers:
         ssl_certificate_id: "{{internal_certificate}}"
     security_groups:
       - "{{coreos_internal_elb_security_group}}"
+  - name: sluice
+    health_check:
+      ping_protocol: tcp
+      ping_port: 9107
+      response_timeout: 2
+      interval: 5
+      unhealthy_threshold: 2
+      healthy_threshold: 5
+    listeners:
+      - protocol: tcp
+        load_balancer_port: 8443
+        instance_protocol: tcp
+        instance_port: 9107
+        ssl_certificate_id: "{{internal_certificate}}"
+    security_groups:
+      - "{{coreos_internal_elb_security_group}}"
 
 dns_records:
   - record: cats
     load_balancer_name: cats
+    internal: yes
+  - record: sluice
+    load_balancer_name: sluice
     internal: yes
